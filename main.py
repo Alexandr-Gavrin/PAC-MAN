@@ -1,19 +1,35 @@
 import pygame
 import time
+import sys
 
 pygame.init()
 width, height = 841, 901
-screen = pygame.display.set_mode((1000, 0), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((width, height))
 all_sprites = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
 
-title_width = 35
-title_height = 35
+pygame.init()
+width, height = 841, 901
+screen = pygame.display.set_mode((width, height))
+all_sprites = pygame.sprite.Group()
+wall_group = pygame.sprite.Group()
 
+title_width = 30
+title_height = 30
+StartPacmenx = 300
+
+
+def terminate():
+    pygame.quit()
+    sys.exit()
+
+title_width = 30
+title_height = 30
 
 def start_screen():
+    global StartPacmenx
     title = pygame.image.load('data/title.png')
-    screen.blit(title, (250, 0))
+    screen.blit(title, (200, 0))
     start_screen_text = ["Начать", "",
                          "Настройки", "",
                          "Выход"]
@@ -28,7 +44,33 @@ def start_screen():
         intro_rect.x = width // 2 - line_rendered.get_width() // 2
         text_coord += intro_rect.height
         screen.blit(line_rendered, intro_rect)
-
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_DOWN:
+                if StartPacmenx == 300:
+                    pacmen_start_screen_sprites.update(-35, 90)
+                    StartPacmenx += 90
+                elif StartPacmenx == 390:
+                    pacmen_start_screen_sprites.update(35, 90)
+                    StartPacmenx += 90
+                elif StartPacmenx == 480:
+                    pacmen_start_screen_sprites.update(0, -180)
+                    StartPacmenx -= 180
+            if event.key == pygame.K_UP:
+                if StartPacmenx == 300:
+                    pacmen_start_screen_sprites.update(0, 180)
+                    StartPacmenx += 180
+                elif StartPacmenx == 390:
+                    pacmen_start_screen_sprites.update(35, -90)
+                    StartPacmenx -= 90
+                elif StartPacmenx == 480:
+                    pacmen_start_screen_sprites.update(-35, -90)
+                    StartPacmenx -= 90
+            if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
+                if StartPacmenx == 480:
+                    terminate()
+                if StartPacmenx == 300:
+                    pass
 
 class PacmenStart(pygame.sprite.Sprite):
     def __init__(self):
@@ -41,7 +83,6 @@ class PacmenStart(pygame.sprite.Sprite):
     def update(self, x, y):
         self.rect.y += y
         self.rect.x += x
-
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
@@ -63,7 +104,6 @@ class Player(pygame.sprite.Sprite):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
 
-
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(all_sprites, wall_group)
@@ -76,20 +116,17 @@ class Wall(pygame.sprite.Sprite):
 class Point(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(all_sprites, wall_group)
-        self.image = pygame.Surface((title_width - 15, title_height - 15))
+        self.image = pygame.Surface((title_width - 10, title_height - 10))
         pygame.draw.circle(self.image, (255, 255, 173), (15, 15), 5, 0)
         self.rect = self.image.get_rect().move(title_width * x,
                                                title_height * y)
-
+player_group = pygame.sprite.Group()
 
 def load_level(filename):
     filename = 'data/' + filename
     with open(filename, 'r') as mapFile:
         level_map = [line for line in mapFile]
     return level_map
-
-
-player_group = pygame.sprite.Group()
 
 
 def generate_level(level):
@@ -104,22 +141,22 @@ def generate_level(level):
 
 
 generate_level(load_level('level.txt'))
+all_sprites = pygame.sprite.Group()
 start_screen_sprites = pygame.sprite.Group()
 pacmen_start_screen_sprites = pygame.sprite.Group()
 enemy_start_screen_sprites = pygame.sprite.Group()
 PacmenStart()
 running = True
-
+start_screen()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        keys = pygame.key.get_pressed()
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_DOWN:
-                pacmen_start_screen_sprites.update(0, 85)
-    all_sprites.draw(screen)
-    player_group.update()
+            PacmenStart.update(event)
+    screen.fill((0, 0, 0))
+    pacmen_start_screen_sprites.draw(screen)
+    all_sprites.update()
     time.sleep(0.12)
     pygame.display.flip()
 pygame.quit()
