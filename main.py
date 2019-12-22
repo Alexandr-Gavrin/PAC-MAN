@@ -9,9 +9,10 @@ wall_group = pygame.sprite.Group()
 title_width = 30
 title_height = 30
 
+
 def start_screen():
     title = pygame.image.load('data/title.png')
-    screen.blit(title, (250, 0))
+    screen.blit(title, (200, 0))
     start_screen_text = ["Начать", "",
                          "Настройки", "",
                          "Выход"]
@@ -33,17 +34,12 @@ class PacmenStart(pygame.sprite.Sprite):
         super().__init__(pacmen_start_screen_sprites)
         self.image = pygame.image.load('data/start_pacman2.0.png')
         self.rect = self.image.get_rect()
-        self.rect.x = 350
-        self.rect.y = 210
+        self.rect.x = 300
+        self.rect.y = 205
 
-    def update(self, *args):
-        print(12)
-        if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_DOWN:
-            print(1)
-            if self.rect.x == 350:
-                print(2)
-                self.rect.y -= 20
-                self.rect.x -= 50
+    def update(self, x, y):
+        self.rect.y += y
+        self.rect.x += x
 
 
 class Wall(pygame.sprite.Sprite):
@@ -114,12 +110,33 @@ enemy_start_screen_sprites = pygame.sprite.Group()
 PacmenStart()
 running = True
 start_screen()
+StartPacmenx = 300
+StartPacmeny = 205
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
-            PacmenStart.update(event)
+            if event.key == pygame.K_DOWN:
+                if StartPacmenx == 300:
+                    pacmen_start_screen_sprites.update(-35, 90)
+                    StartPacmenx += 90
+                elif StartPacmenx == 390:
+                    pacmen_start_screen_sprites.update(35, 90)
+                    StartPacmenx += 90
+                elif StartPacmenx == 480:
+                    pacmen_start_screen_sprites.update(0, -180)
+                    StartPacmenx -= 180
+            if event.key == pygame.K_UP:
+                if StartPacmenx == 300:
+                    pacmen_start_screen_sprites.update(0, 180)
+                    StartPacmenx += 180
+                elif StartPacmenx == 390:
+                    pacmen_start_screen_sprites.update(35, -90)
+                    StartPacmenx -= 90
+                elif StartPacmenx == 480:
+                    pacmen_start_screen_sprites.update(-35, -90)
+                    StartPacmenx -= 90
     screen.fill((0, 0, 0))
     start_screen()
     pacmen_start_screen_sprites.draw(screen)
