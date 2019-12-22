@@ -22,14 +22,41 @@ def start_screen():
         intro_rect.x = width // 2 - line_rendered.get_width() // 2
         text_coord += intro_rect.height
         screen.blit(line_rendered, intro_rect)
+    pacmen = pygame.sprite.Sprite()
+
+
+class PacmenStart(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__(pacmen_start_screen_sprites)
+        self.image = pygame.image.load('data/start_pacman2.0.png')
+        self.rect = self.image.get_rect()
+        self.rect.x = 350
+        self.rect.y = 210
+
+    def update(self, *args):
+        print(12)
+        if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_DOWN:
+            print(1)
+            if self.rect.x == 350:
+                print(2)
+                self.rect.y -= 20
+                self.rect.x -= 50
+
 
 running = True
-start_screen()
+all_sprites = pygame.sprite.Group()
+start_screen_sprites = pygame.sprite.Group()
+pacmen_start_screen_sprites = pygame.sprite.Group()
+enemy_start_screen_sprites = pygame.sprite.Group()
+PacmenStart()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            PacmenStart.update(event)
     screen.fill((0, 0, 0))
     start_screen()
+    pacmen_start_screen_sprites.draw(screen)
     pygame.display.flip()
 pygame.quit()
