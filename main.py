@@ -1,9 +1,13 @@
 import pygame
 
 pygame.init()
-width, height = 950, 650
+width, height = 841, 901
 screen = pygame.display.set_mode((width, height))
+all_sprites = pygame.sprite.Group()
+wall_group = pygame.sprite.Group()
 
+title_width = 30
+title_height = 30
 
 def start_screen():
     title = pygame.image.load('data/title.png')
@@ -22,7 +26,6 @@ def start_screen():
         intro_rect.x = width // 2 - line_rendered.get_width() // 2
         text_coord += intro_rect.height
         screen.blit(line_rendered, intro_rect)
-    pacmen = pygame.sprite.Sprite()
 
 
 class PacmenStart(pygame.sprite.Sprite):
@@ -43,12 +46,74 @@ class PacmenStart(pygame.sprite.Sprite):
                 self.rect.x -= 50
 
 
-running = True
+class Wall(pygame.sprite.Sprite):
+    def __init__(self, x, y, num=0):
+        super().__init__(all_sprites, wall_group)
+        if num == 0:
+            self.image = pygame.Surface((title_width, 2))
+            self.image.fill(pygame.Color('Blue'))
+            self.rect = self.image.get_rect().move(title_width * x,
+                                                   title_height * y)
+        if num == 1:
+            self.image = pygame.Surface((2, title_height))
+            self.image.fill(pygame.Color('Blue'))
+            self.rect = self.image.get_rect().move(title_width * x,
+                                                   title_height * y)
+
+        if num == 2:
+            self.image = pygame.Surface((title_width, 2))
+            self.image.fill(pygame.Color('Blue'))
+            self.rect = self.image.get_rect().move(title_width * x,
+                                                   title_height * y + title_height)
+
+        if num == 3:
+            self.image = pygame.Surface((2, title_height))
+            self.image.fill(pygame.Color('Blue'))
+            self.rect = self.image.get_rect().move(title_width * x + title_width,
+                                                   title_height * y)
+
+        if len(pygame.sprite.spritecollide(self, all_sprites, False)) > 3:
+            self.kill()
+
+
+class Point(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__(all_sprites, wall_group)
+        self.image = pygame.Surface((title_width - 10, title_height - 10))
+        pygame.draw.circle(self.image, (255, 255, 173), (15, 15), 5, 0)
+        self.rect = self.image.get_rect().move(title_width * x,
+                                               title_height * y)
+
+
+def load_level(filename):
+    filename = 'data/' + filename
+    with open(filename, 'r') as mapFile:
+        level_map = [line for line in mapFile]
+    return level_map
+
+
+def generate_level(level):
+    for y in range(len(level)):
+        for x in range(len(level[y])):
+            if level[y][x] == '.':
+                Point(x, y)
+    for y in range(len(level)):
+        for x in range(len(level[y])):
+            if level[y][x] == '#':
+                Wall(x, y, num=0)
+                Wall(x, y, num=1)
+                Wall(x, y, num=2)
+                Wall(x, y, num=3)
+
+
+generate_level(load_level('level.txt'))
 all_sprites = pygame.sprite.Group()
 start_screen_sprites = pygame.sprite.Group()
 pacmen_start_screen_sprites = pygame.sprite.Group()
 enemy_start_screen_sprites = pygame.sprite.Group()
 PacmenStart()
+running = True
+start_screen()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
