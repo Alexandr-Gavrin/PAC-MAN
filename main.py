@@ -1,4 +1,5 @@
 import pygame
+import sys
 
 pygame.init()
 width, height = 841, 901
@@ -8,9 +9,16 @@ wall_group = pygame.sprite.Group()
 
 title_width = 30
 title_height = 30
+StartPacmenx = 300
+
+
+def terminate():
+    pygame.quit()
+    sys.exit()
 
 
 def start_screen():
+    global StartPacmenx
     title = pygame.image.load('data/title.png')
     screen.blit(title, (200, 0))
     start_screen_text = ["Начать", "",
@@ -27,6 +35,33 @@ def start_screen():
         intro_rect.x = width // 2 - line_rendered.get_width() // 2
         text_coord += intro_rect.height
         screen.blit(line_rendered, intro_rect)
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_DOWN:
+                if StartPacmenx == 300:
+                    pacmen_start_screen_sprites.update(-35, 90)
+                    StartPacmenx += 90
+                elif StartPacmenx == 390:
+                    pacmen_start_screen_sprites.update(35, 90)
+                    StartPacmenx += 90
+                elif StartPacmenx == 480:
+                    pacmen_start_screen_sprites.update(0, -180)
+                    StartPacmenx -= 180
+            if event.key == pygame.K_UP:
+                if StartPacmenx == 300:
+                    pacmen_start_screen_sprites.update(0, 180)
+                    StartPacmenx += 180
+                elif StartPacmenx == 390:
+                    pacmen_start_screen_sprites.update(35, -90)
+                    StartPacmenx -= 90
+                elif StartPacmenx == 480:
+                    pacmen_start_screen_sprites.update(-35, -90)
+                    StartPacmenx -= 90
+            if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
+                if StartPacmenx == 480:
+                    terminate()
+                if StartPacmenx == 300:
+                    pass
 
 
 class PacmenStart(pygame.sprite.Sprite):
@@ -110,33 +145,10 @@ enemy_start_screen_sprites = pygame.sprite.Group()
 PacmenStart()
 running = True
 start_screen()
-StartPacmenx = 300
-StartPacmeny = 205
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_DOWN:
-                if StartPacmenx == 300:
-                    pacmen_start_screen_sprites.update(-35, 90)
-                    StartPacmenx += 90
-                elif StartPacmenx == 390:
-                    pacmen_start_screen_sprites.update(35, 90)
-                    StartPacmenx += 90
-                elif StartPacmenx == 480:
-                    pacmen_start_screen_sprites.update(0, -180)
-                    StartPacmenx -= 180
-            if event.key == pygame.K_UP:
-                if StartPacmenx == 300:
-                    pacmen_start_screen_sprites.update(0, 180)
-                    StartPacmenx += 180
-                elif StartPacmenx == 390:
-                    pacmen_start_screen_sprites.update(35, -90)
-                    StartPacmenx -= 90
-                elif StartPacmenx == 480:
-                    pacmen_start_screen_sprites.update(-35, -90)
-                    StartPacmenx -= 90
     screen.fill((0, 0, 0))
     start_screen()
     pacmen_start_screen_sprites.draw(screen)
