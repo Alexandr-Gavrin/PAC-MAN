@@ -4,11 +4,10 @@ import sys
 
 pygame.init()
 width, height = 841, 901
-screen = pygame.display.set_mode((width, height))
+screen = pygame.display.set_mode((width, height), )
 all_sprites = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
-
-
+point_group = pygame.sprite.Group()
 
 title_width = 30
 title_height = 30
@@ -42,6 +41,11 @@ def start_screen():
 
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
+                if StartPacmenx == 480:
+                    terminate()
+                if StartPacmenx == 300:
+                    pass
             if event.key == pygame.K_DOWN:
                 if StartPacmenx == 300:
                     pacmen_start_screen_sprites.update(-35, 90)
@@ -62,16 +66,11 @@ def start_screen():
                 elif StartPacmenx == 480:
                     pacmen_start_screen_sprites.update(-35, -90)
                     StartPacmenx -= 90
-            if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
-                if StartPacmenx == 480:
-                    terminate()
-                if StartPacmenx == 300:
-                    pass
 
 
 class PacmenStart(pygame.sprite.Sprite):
     def __init__(self):
-        super().__init__(pacmen_start_screen_sprites)
+        super().__init__(pacmen_start_screen_sprites, start_screen_sprites)
         self.image = pygame.image.load('data/start_pacman2.0.png')
         self.rect = self.image.get_rect()
         self.rect.x = 300
@@ -82,6 +81,31 @@ class PacmenStart(pygame.sprite.Sprite):
         self.rect.x += x
 
 
+class Startmenuenemy(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y):
+        super().__init__(enemy_start_screen_sprites, start_screen_sprites)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+        self.image = self.frames[self.cur_frame]
+        self.rect.x = (self.rect.x + 1) % width
+        time.sleep(0.001)
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__(all_sprites, player_group)
@@ -90,6 +114,9 @@ class Player(pygame.sprite.Sprite):
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
         self.rect = self.rect.move(x * title_width, y * title_width)
+        self.dx = 10
+        self.dy = 0
+        self.mask = pygame.mask.from_surface(self.image)
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
@@ -101,6 +128,27 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    self.dx = 10
+                    self.dy = 0
+                if event.key == pygame.K_LEFT:
+                    self.dx = -10
+                    self.dy = 0
+                if event.key == pygame.K_UP:
+                    self.dx = 0
+                    self.dy = -10
+                if event.key == pygame.K_DOWN:
+                    self.dx = 0
+                    self.dy = 10
+        if pygame.sprite.spritecollide(self, point_group, True):
+            pass
+        if pygame.sprite.spritecollideany(self, wall_group):
+            self.dx = 0
+            self.dy = 0
+        self.rect.x += self.dx
+        self.rect.y += self.dy
 
 
 class Wall(pygame.sprite.Sprite):
@@ -114,14 +162,11 @@ class Wall(pygame.sprite.Sprite):
 
 class Point(pygame.sprite.Sprite):
     def __init__(self, x, y):
-        super().__init__(all_sprites, wall_group)
+        super().__init__(all_sprites, point_group)
         self.image = pygame.Surface((title_width - 10, title_height - 10))
         pygame.draw.circle(self.image, (255, 255, 173), (15, 15), 5, 0)
         self.rect = self.image.get_rect().move(title_width * x,
                                                title_height * y)
-
-
-
 
 
 def load_level(filename):
@@ -146,23 +191,32 @@ pacmen_start_screen_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 start_screen_sprites = pygame.sprite.Group()
 enemy_start_screen_sprites = pygame.sprite.Group()
-
-
-generate_level(load_level('level.txt'))
-
 PacmenStart()
-
 start_screen()
-
-
+generate_level(load_level('level.txt'))
+Startmenuenemy(pygame.image.load('data/red_enemy.png'), 2, 1, 0, 870)
 running = True
-
 while running:
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
+                if StartPacmenx == 300:
+                    running = False
+                    break
     screen.fill((0, 0, 0))
     start_screen()
     pacmen_start_screen_sprites.draw(screen)
+    enemy_start_screen_sprites.draw(screen)
+    enemy_start_screen_sprites.update()
+    pygame.display.flip()
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            terminate()
+    screen.fill((0, 0, 0))
+    all_sprites.draw(screen)
+    time.sleep(0.1)
+    player_group.update()
     pygame.display.flip()
 pygame.quit()
