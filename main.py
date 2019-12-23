@@ -8,7 +8,7 @@ screen = pygame.display.set_mode((width, height), )
 all_sprites = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
 point_group = pygame.sprite.Group()
-
+running = True
 title_width = 30
 title_height = 30
 StartPacmenx = 300
@@ -20,7 +20,7 @@ def terminate():
 
 
 def start_screen():
-    global StartPacmenx
+    global StartPacmenx, running
     title = pygame.image.load('data/title.png')
     screen.blit(title, (200, 0))
     start_screen_text = ["Начать", "",
@@ -45,7 +45,7 @@ def start_screen():
                 if StartPacmenx == 480:
                     terminate()
                 if StartPacmenx == 300:
-                    pass
+                    running = False
             if event.key == pygame.K_DOWN:
                 if StartPacmenx == 300:
                     pacmen_start_screen_sprites.update(-35, 90)
@@ -114,8 +114,8 @@ class Player(pygame.sprite.Sprite):
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
         self.rect = self.rect.move(x * title_width, y * title_width)
-        self.dx = 10
-        self.dy = 0
+        self.speed_x = 6
+        self.speed_y = 0
         self.mask = pygame.mask.from_surface(self.image)
 
     def cut_sheet(self, sheet, columns, rows):
@@ -125,30 +125,35 @@ class Player(pygame.sprite.Sprite):
                 frame_location = (self.rect.w * i, self.rect.h * j)
                 self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
 
-    def update(self):
+    def update(self, x=0, y=0):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    self.dx = 10
-                    self.dy = 0
-                if event.key == pygame.K_LEFT:
-                    self.dx = -10
-                    self.dy = 0
-                if event.key == pygame.K_UP:
-                    self.dx = 0
-                    self.dy = -10
-                if event.key == pygame.K_DOWN:
-                    self.dx = 0
-                    self.dy = 10
+        if self.rect.x < 0:
+            self.rect.x = 841
+        if self.rect.x > 841:
+            self.rect.x = 0
+        if x == 0 and y == 0:
+            pass
+        else:
+            self.speed_x = x
+            self.speed_y = y
+            self.rect.x += self.speed_x
+            self.rect.y += self.speed_y
+            if pygame.sprite.spritecollideany(self, wall_group):
+                self.rect.x -= self.speed_x
+                self.rect.y -= self.speed_y
+                self.speed_x = self.speed_y
+                self.speed_y = 0
+
         if pygame.sprite.spritecollide(self, point_group, True):
             pass
+        self.rect.x += self.speed_x
         if pygame.sprite.spritecollideany(self, wall_group):
-            self.dx = 0
-            self.dy = 0
-        self.rect.x += self.dx
-        self.rect.y += self.dy
+            self.rect.x -= self.speed_x
+
+        self.rect.y += self.speed_y
+        if pygame.sprite.spritecollideany(self, wall_group):
+            self.rect.y -= self.speed_y
 
 
 class Wall(pygame.sprite.Sprite):
@@ -194,8 +199,7 @@ enemy_start_screen_sprites = pygame.sprite.Group()
 PacmenStart()
 start_screen()
 generate_level(load_level('level.txt'))
-Startmenuenemy(pygame.image.load('data/red_enemy.png'), 2, 1, 0, 870)
-running = True
+Startmenuenemy(pygame.image.load('data/red_enemy_right.png'), 2, 1, 0, height)
 while running:
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
@@ -214,6 +218,15 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             terminate()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RIGHT:
+                player_group.update(6, 0)
+            if event.key == pygame.K_DOWN:
+                player_group.update(0, 6)
+            if event.key == pygame.K_LEFT:
+                player_group.update(-6, 0)
+            if event.key == pygame.K_UP:
+                player_group.update(0, -6)
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
     time.sleep(0.1)
