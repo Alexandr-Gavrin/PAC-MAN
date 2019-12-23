@@ -8,11 +8,7 @@ screen = pygame.display.set_mode((width, height))
 all_sprites = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
 
-pygame.init()
-width, height = 841, 901
-screen = pygame.display.set_mode((width, height))
-all_sprites = pygame.sprite.Group()
-wall_group = pygame.sprite.Group()
+
 
 title_width = 30
 title_height = 30
@@ -23,8 +19,6 @@ def terminate():
     pygame.quit()
     sys.exit()
 
-title_width = 30
-title_height = 30
 
 def start_screen():
     global StartPacmenx
@@ -36,6 +30,7 @@ def start_screen():
 
     font = pygame.font.Font(None, 50)
     text_coord = 200
+
     for string in start_screen_text:
         line_rendered = font.render(string, 1, pygame.Color('yellow'))
         intro_rect = line_rendered.get_rect()
@@ -44,6 +39,7 @@ def start_screen():
         intro_rect.x = width // 2 - line_rendered.get_width() // 2
         text_coord += intro_rect.height
         screen.blit(line_rendered, intro_rect)
+
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_DOWN:
@@ -72,17 +68,19 @@ def start_screen():
                 if StartPacmenx == 300:
                     pass
 
+
 class PacmenStart(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(pacmen_start_screen_sprites)
         self.image = pygame.image.load('data/start_pacman2.0.png')
         self.rect = self.image.get_rect()
-        self.rect.x = 350
-        self.rect.y = 210
+        self.rect.x = 300
+        self.rect.y = 205
 
     def update(self, x, y):
         self.rect.y += y
         self.rect.x += x
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
@@ -104,6 +102,7 @@ class Player(pygame.sprite.Sprite):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
 
+
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(all_sprites, wall_group)
@@ -120,7 +119,10 @@ class Point(pygame.sprite.Sprite):
         pygame.draw.circle(self.image, (255, 255, 173), (15, 15), 5, 0)
         self.rect = self.image.get_rect().move(title_width * x,
                                                title_height * y)
-player_group = pygame.sprite.Group()
+
+
+
+
 
 def load_level(filename):
     filename = 'data/' + filename
@@ -140,23 +142,27 @@ def generate_level(level):
                 Player(pygame.image.load('data/Pac-man.png'), 3, 1, x, y)
 
 
-generate_level(load_level('level.txt'))
-all_sprites = pygame.sprite.Group()
-start_screen_sprites = pygame.sprite.Group()
 pacmen_start_screen_sprites = pygame.sprite.Group()
+player_group = pygame.sprite.Group()
+start_screen_sprites = pygame.sprite.Group()
 enemy_start_screen_sprites = pygame.sprite.Group()
+
+
+generate_level(load_level('level.txt'))
+
 PacmenStart()
-running = True
+
 start_screen()
+
+
+running = True
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN:
-            PacmenStart.update(event)
     screen.fill((0, 0, 0))
+    start_screen()
     pacmen_start_screen_sprites.draw(screen)
-    all_sprites.update()
-    time.sleep(0.12)
     pygame.display.flip()
 pygame.quit()
