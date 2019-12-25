@@ -213,6 +213,8 @@ generate_level(load_level('level.txt'))
 Startmenuenemy(pygame.image.load('data/red_enemy_right.png'), 2, 1, 0, 872)
 while running:
     for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            terminate()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
                 if StartPacmenx == 300:
