@@ -111,6 +111,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__(all_sprites, player_group)
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
+        self.mask = pygame.mask.from_surface(pygame.image.load('data/Pac-man.png'))
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
         self.rect = self.rect.move(x * title_width, y * title_width)
@@ -125,7 +126,7 @@ class Player(pygame.sprite.Sprite):
                 frame_location = (self.rect.w * i, self.rect.h * j)
                 self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
 
-    def update(self, x=0, y=0, direction=0):
+    def update(self, x=0, y=0):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
         if self.rect.x < 0:
@@ -133,14 +134,8 @@ class Player(pygame.sprite.Sprite):
         if self.rect.x > 841:
             self.rect.x = 0
         if x == 0 and y == 0:
-            self.rect.x += self.speed_x
-            if pygame.sprite.spritecollideany(self, wall_group):
-                self.rect.x -= self.speed_x
-
-            self.rect.y += self.speed_y
-            if pygame.sprite.spritecollideany(self, wall_group):
-                self.rect.y -= self.speed_y
-        elif self.speed_y == y and self.speed_x == x:
+            pass
+        elif x == self.speed_x and y == self.speed_y:
             pass
         else:
             self.speed_x = x
@@ -148,23 +143,21 @@ class Player(pygame.sprite.Sprite):
             self.rect.x += self.speed_x
             self.rect.y += self.speed_y
             if pygame.sprite.spritecollideany(self, wall_group):
-                if direction == 'up' or direction == 'down':
-                    self.rect.x -= self.speed_x
-                    self.rect.y -= self.speed_y
-                    self.speed_x = self.speed_y
-                    self.speed_y = 0
-                    return
-                elif direction == 'left' or direction == 'right':
-                    self.rect.x -= self.speed_x
-                    self.rect.y -= self.speed_y
-                    self.speed_y = self.speed_x
-                    self.speed_x = 0
-                    return
-            else:
+                self.rect.x -= self.speed_x
+                self.rect.y -= self.speed_y
+                self.speed_x = self.speed_y
+                self.speed_y = 0
                 return
 
         if pygame.sprite.spritecollide(self, point_group, True):
             pass
+        self.rect.x += self.speed_x
+        if pygame.sprite.spritecollideany(self, wall_group):
+            self.rect.x -= self.speed_x
+
+        self.rect.y += self.speed_y
+        if pygame.sprite.spritecollideany(self, wall_group):
+            self.rect.y -= self.speed_y
 
 
 class Wall(pygame.sprite.Sprite):
@@ -210,7 +203,8 @@ enemy_start_screen_sprites = pygame.sprite.Group()
 PacmenStart()
 start_screen()
 generate_level(load_level('level.txt'))
-Startmenuenemy(pygame.image.load('data/red_enemy_right.png'), 2, 1, 0, 872)
+Startmenuenemy(pygame.image.load('data/red_enemy_right.png'), 2, 1, 0, height)
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
@@ -224,6 +218,7 @@ while running:
     enemy_start_screen_sprites.draw(screen)
     enemy_start_screen_sprites.update()
     pygame.display.flip()
+
 running = True
 while running:
     for event in pygame.event.get():
@@ -231,13 +226,13 @@ while running:
             terminate()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
-                player_group.update(6, 0, 'right')
+                player_group.update(6, 0)
             if event.key == pygame.K_DOWN:
-                player_group.update(0, 6, 'down')
+                player_group.update(0, 6)
             if event.key == pygame.K_LEFT:
-                player_group.update(-6, 0, 'left')
+                player_group.update(-6, 0)
             if event.key == pygame.K_UP:
-                player_group.update(0, -6, 'up')
+                player_group.update(0, -6)
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
     time.sleep(0.1)
