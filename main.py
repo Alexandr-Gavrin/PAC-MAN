@@ -11,12 +11,9 @@ point_group = pygame.sprite.Group()
 running = True
 title_width = 30
 title_height = 30
-StartPacmenx = 300
 score_count = 0
+cell = 0
 
-
-pygame.mixer.music.load('data/pacman_beginning.mp3')
-pygame.mixer.music.play()
 
 def terminate():
     pygame.quit()
@@ -24,7 +21,7 @@ def terminate():
 
 
 def start_screen():
-    global StartPacmenx, running
+    global cell, running
     title = pygame.image.load('data/title.png')
     screen.blit(title, (200, 0))
     start_screen_text = ["Начать", "",
@@ -48,30 +45,20 @@ def start_screen():
             terminate()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
-                if StartPacmenx == 480:
+                if cell == 2:
                     terminate()
-                if StartPacmenx == 300:
+                if cell == 0:
                     running = False
             if event.key == pygame.K_DOWN:
-                if StartPacmenx == 300:
-                    pacmen_start_screen_sprites.update(-35, 90)
-                    StartPacmenx += 90
-                elif StartPacmenx == 390:
-                    pacmen_start_screen_sprites.update(35, 90)
-                    StartPacmenx += 90
-                elif StartPacmenx == 480:
-                    pacmen_start_screen_sprites.update(0, -180)
-                    StartPacmenx -= 180
+                cell = (cell + 1) % 3
             if event.key == pygame.K_UP:
-                if StartPacmenx == 300:
-                    pacmen_start_screen_sprites.update(0, 180)
-                    StartPacmenx += 180
-                elif StartPacmenx == 390:
-                    pacmen_start_screen_sprites.update(35, -90)
-                    StartPacmenx -= 90
-                elif StartPacmenx == 480:
-                    pacmen_start_screen_sprites.update(-35, -90)
-                    StartPacmenx -= 90
+                cell = (cell - 1) % 3
+            if cell == 0:
+                pacmen_start_screen_sprites.update(295, 205)
+            elif cell == 1:
+                pacmen_start_screen_sprites.update(260, 295)
+            else:
+                pacmen_start_screen_sprites.update(295, 385)
 
 
 class PacmenStart(pygame.sprite.Sprite):
@@ -83,8 +70,8 @@ class PacmenStart(pygame.sprite.Sprite):
         self.rect.y = 205
 
     def update(self, x, y):
-        self.rect.y += y
-        self.rect.x += x
+        self.rect.y = y
+        self.rect.x = x
 
 
 class Startmenuenemy(pygame.sprite.Sprite):
@@ -109,7 +96,6 @@ class Startmenuenemy(pygame.sprite.Sprite):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
         self.rect.x = (self.rect.x + 5) % width
-        time.sleep(0.03)
 
 
 def score_counter():
@@ -232,6 +218,10 @@ start_screen()
 generate_level(load_level('level.txt'))
 Startmenuenemy(pygame.image.load('data/start_enemy.png'), 4, 1, 0, 800)
 
+pygame.mixer.music.load('data/pacman_beginning.mp3')
+pygame.mixer.music.play()
+pygame.mixer.music.set_volume(0.2)
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -252,7 +242,6 @@ running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            print(1)
             terminate()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
