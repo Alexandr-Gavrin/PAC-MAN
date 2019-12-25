@@ -12,6 +12,7 @@ running = True
 title_width = 30
 title_height = 30
 StartPacmenx = 300
+score_count = 0
 
 
 def terminate():
@@ -40,6 +41,8 @@ def start_screen():
         screen.blit(line_rendered, intro_rect)
 
     for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            terminate()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
                 if StartPacmenx == 480:
@@ -106,7 +109,22 @@ class Startmenuenemy(pygame.sprite.Sprite):
         time.sleep(0.001)
 
 
+def score_counter():
+    global score_count
+    screen.fill((0, 0, 0))
+    font = pygame.font.Font(None, 25)
+    text = font.render(str(score_count), 0, (255, 255, 255))
+    text_x = 750
+    text_y = 330
+    text_w = text.get_width()
+    text_h = text.get_height()
+    screen.blit(text, (text_x, text_y))
+    pygame.draw.rect(screen, (255, 255, 255), (text_x - 10, text_y - 10,
+                                           text_w + 20, text_h + 20), 1)
+
+
 class Player(pygame.sprite.Sprite):
+
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__(all_sprites, player_group)
         self.frames = []
@@ -117,6 +135,8 @@ class Player(pygame.sprite.Sprite):
         self.speed_x = 6
         self.speed_y = 0
         self.mask = pygame.mask.from_surface(self.image)
+        self.prev_speed_x = self.speed_x
+        self.prev_speed_y = self.speed_y
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
@@ -126,6 +146,7 @@ class Player(pygame.sprite.Sprite):
                 self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
 
     def update(self, x=0, y=0, direction=0):
+        global score_count
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
         if self.rect.x < 0:
@@ -148,23 +169,18 @@ class Player(pygame.sprite.Sprite):
             self.rect.x += self.speed_x
             self.rect.y += self.speed_y
             if pygame.sprite.spritecollideany(self, wall_group):
-                if direction == 'up' or direction == 'down':
-                    self.rect.x -= self.speed_x
-                    self.rect.y -= self.speed_y
-                    self.speed_x = self.speed_y
-                    self.speed_y = 0
-                    return
-                elif direction == 'left' or direction == 'right':
-                    self.rect.x -= self.speed_x
-                    self.rect.y -= self.speed_y
-                    self.speed_y = self.speed_x
-                    self.speed_x = 0
-                    return
+                self.rect.x -= self.speed_x
+                self.rect.y -= self.speed_y
+                self.speed_y = self.prev_speed_y
+                self.speed_x = self.prev_speed_x
+                return
             else:
+                self.prev_speed_x = self.speed_x
+                self.prev_speed_y = self.speed_y
                 return
 
         if pygame.sprite.spritecollide(self, point_group, True):
-            pass
+            score_count += 10
 
 
 class Wall(pygame.sprite.Sprite):
@@ -241,6 +257,7 @@ while running:
             if event.key == pygame.K_UP:
                 player_group.update(0, -6, 'up')
     screen.fill((0, 0, 0))
+    score_counter()
     all_sprites.draw(screen)
     time.sleep(0.1)
     player_group.update()
