@@ -15,6 +15,9 @@ StartPacmenx = 300
 score_count = 0
 
 
+pygame.mixer.music.load('data/pacman_beginning.mp3')
+pygame.mixer.music.play()
+
 def terminate():
     pygame.quit()
     sys.exit()
@@ -120,7 +123,7 @@ def score_counter():
     text_h = text.get_height()
     screen.blit(text, (text_x, text_y))
     pygame.draw.rect(screen, (255, 255, 255), (text_x - 10, text_y - 10,
-                                           text_w + 20, text_h + 20), 1)
+                                               text_w + 20, text_h + 20), 1)
 
 
 class Player(pygame.sprite.Sprite):
