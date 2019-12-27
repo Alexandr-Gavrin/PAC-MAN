@@ -9,13 +9,19 @@ screen = pygame.display.set_mode((width, height), )
 all_sprites = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
 point_group = pygame.sprite.Group()
+end_screen_enemy = pygame.sprite.Group()
+particles = pygame.sprite.Group()
 running = True
 title_width = 30
+gravity = 0.5
 title_height = 30
 score_count = 0
 cell = 0
 coord_x = 0
 coord_y = 0
+fl_death = False
+screen_rect = (0, 0, width, height)
+
 
 def terminate():
     pygame.quit()
@@ -63,6 +69,72 @@ def start_screen():
             else:
                 pacmen_start_screen_sprites.update(295, 385)
 
+
+def end_screen(fl):
+    if fl:
+        game_over_image = pygame.image.load('data/game_over.png')
+        screen.blit(game_over_image, (225, 325))
+        end_screen_enemy.draw(screen)
+        end_screen_enemy.update()
+    else:
+        win_image = pygame.image.load('data/win.png')
+        screen.blit(win_image, (275, 325))
+        create_particles((random.randint(0, 800), 0), random.randint(0, 5))
+        particles.draw(screen)
+        particles.update()
+
+
+class Particle(pygame.sprite.Sprite):
+    fire = [pygame.image.load("data/star.png")]
+    for scale in (5, 10, 20):
+        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
+
+    def __init__(self, pos, dx, dy):
+        super().__init__(particles)
+        self.image = random.choice(self.fire)
+        self.rect = self.image.get_rect()
+
+        self.velocity = [dx, dy]
+        self.rect.x, self.rect.y = pos
+        self.gravity = gravity
+
+    def update(self):
+        self.velocity[1] += self.gravity
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        if not self.rect.colliderect(screen_rect):
+            self.kill()
+
+
+def create_particles(position, count):
+    numbers = range(-5, 6)
+    for _ in range(count):
+        Particle(position, random.choice(numbers), random.choice(numbers))
+
+
+class End_screen_enemies(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y):
+        super().__init__(end_screen_enemy)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+        self.image = self.frames[self.cur_frame]
+        self.rect.x = (self.rect.x + 5) % width
+        time.sleep(0.03)
 
 
 class PacmenStart(pygame.sprite.Sprite):
@@ -139,9 +211,6 @@ class Player(pygame.sprite.Sprite):
         self.prev_speed_x = self.speed_x
         self.prev_speed_y = self.speed_y
 
-
-
-
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
         for j in range(rows):
@@ -191,7 +260,6 @@ class Player(pygame.sprite.Sprite):
         coord_x = self.rect.x
         coord_y = self.rect.y
 
-
     def update_image(self, sheet, rows, col):
         x, y = self.rect.x, self.rect.y
         self.cur_frame = 0
@@ -201,17 +269,24 @@ class Player(pygame.sprite.Sprite):
             for i in range(col):
                 frame_location = (self.rect.w * i, self.rect.h * j)
                 self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
-        self.rect = self.rect.move(x,y)
+        self.rect = self.rect.move(x, y)
 
-
-
+    def wall(self, x, y):
+        self.rect.x += x
+        self.rect.y += y
+        if pygame.sprite.spritecollideany(self, wall_group):
+            self.rect.x -= x
+            self.rect.y -= y
+            return True
+        return False
 
 
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(all_sprites, wall_group)
-        self.image = pygame.Surface((title_width, title_height))
-        pygame.draw.rect(self.image, pygame.Color('Blue'), (0, 0, title_width, title_height), 2)
+        self.image = pygame.Surface((title_width - 5, title_height - 5))
+        pygame.draw.rect(self.image, pygame.Color('Blue'),
+                         (0, 0, title_width - 5, title_height - 5), 2)
         self.rect = self.image.get_rect().move(title_width * x,
                                                title_height * y)
 
@@ -378,30 +453,52 @@ while running:
             terminate()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
-                player_group.update(6, 0, 'right')
-                player_group = pygame.sprite.Group()
-                Player(pygame.image.load('data/Pac-man_right.png'), 3, 1,
-                        coord_x // title_width, coord_y // title_height, 6, 0)
+                for i in player_group:
+                    if not i.wall(6, 0):
+                        player_group = pygame.sprite.Group()
+                        Player(pygame.image.load('data/Pac-man_right.png'), 3, 1,
+                               coord_x / title_width, coord_y / title_height, 6, 0)
+
             if event.key == pygame.K_DOWN:
-                player_group.update(0, 6, 'down')
-                player_group = pygame.sprite.Group()
-                Player(pygame.image.load('data/Pac-man_down.png'), 1, 3,
-                       coord_x // title_width, coord_y // title_height, 0, 6)
+                for i in player_group:
+                    if not i.wall(0, 6):
+                        player_group = pygame.sprite.Group()
+                        Player(pygame.image.load('data/Pac-man_down.png'), 1, 3,
+                               coord_x / title_width, coord_y / title_height, 0, 6)
+
             if event.key == pygame.K_LEFT:
-                player_group.update(-6, 0, 'left')
-                player_group = pygame.sprite.Group()
-                Player(pygame.image.load('data/Pac-man_left.png'), 3, 1,
-                       coord_x // title_width, coord_y // title_height, -6, 0)
+                for i in player_group:
+                    if not i.wall(-6, 0):
+                        player_group = pygame.sprite.Group()
+                        Player(pygame.image.load('data/Pac-man_left.png'), 3, 1,
+                               coord_x / title_width, coord_y / title_height, -6, 0)
+
             if event.key == pygame.K_UP:
-                player_group.update(0, -6, 'up')
-                player_group = pygame.sprite.Group()
-                Player(pygame.image.load('data/Pac-man_up.png'), 1, 3,
-                       coord_x // title_width , coord_y // title_height, 0, -6)
+                for i in player_group:
+                    if not i.wall(0, -6):
+                        player_group = pygame.sprite.Group()
+                        Player(pygame.image.load('data/Pac-man_up.png'), 1, 3,
+                               coord_x / title_width, coord_y / title_height, 0, -6)
+
     screen.fill((0, 0, 0))
     score_counter()
     all_sprites.draw(screen)
     time.sleep(0.12)
     player_group.update()
     left_enemy_group.update()
+    pygame.display.flip()
+    if fl_death is True or len(point_group) == 0:
+        running = False
+
+running = True
+End_screen_enemies(pygame.image.load('data/end_screen_error.png'), 2, 1, 0, 516)
+End_screen_enemies(pygame.image.load('data/end_screen_error2.png'), 2, 1, 0, 290)
+
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            terminate()
+    screen.fill((0, 0, 0))
+    end_screen(fl_death)
     pygame.display.flip()
 pygame.quit()
