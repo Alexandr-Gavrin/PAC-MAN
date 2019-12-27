@@ -21,6 +21,10 @@ coord_x = 0
 coord_y = 0
 fl_death = False
 screen_rect = (0, 0, width, height)
+prev_pac_man = 'right'
+rotate_pacman = False
+r, g, b = 0, 0, 0
+arr_color = [r, g, b]
 
 
 def terminate():
@@ -38,9 +42,11 @@ def start_screen():
 
     font = pygame.font.Font(None, 50)
     text_coord = 200
+    random_num = random.randrange(0, 3)
+    arr_color[random_num] = (arr_color[random_num] + 9) % 255
 
     for string in start_screen_text:
-        line_rendered = font.render(string, 1, pygame.Color('yellow'))
+        line_rendered = font.render(string, 1, (arr_color[0], arr_color[1], arr_color[2]))
         intro_rect = line_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
@@ -227,17 +233,20 @@ class Player(pygame.sprite.Sprite):
         if self.rect.x > 841:
             self.rect.x = 0
         if x == 0 and y == 0:
+
             self.rect.x += self.speed_x
             if pygame.sprite.spritecollideany(self, wall_group):
                 self.rect.x -= self.speed_x
                 self.cur_frame = 2
-
+                if rotate_pacman:
+                    self.cur_frame = 1
             self.rect.y += self.speed_y
             if pygame.sprite.spritecollideany(self, wall_group):
                 self.rect.y -= self.speed_y
                 self.cur_frame = 2
-        elif self.speed_y == y and self.speed_x == x:
-            pass
+                if rotate_pacman:
+                    self.cur_frame = 1
+
         else:
             self.speed_x = x
             self.speed_y = y
@@ -249,6 +258,8 @@ class Player(pygame.sprite.Sprite):
                 self.speed_y = self.prev_speed_y
                 self.speed_x = self.prev_speed_x
                 self.cur_frame = 2
+                if rotate_pacman:
+                    self.cur_frame = 1
                 return
             else:
                 self.prev_speed_x = self.speed_x
@@ -278,15 +289,16 @@ class Player(pygame.sprite.Sprite):
             self.rect.x -= x
             self.rect.y -= y
             return True
+        self.rect.x -= x
+        self.rect.y -= y
         return False
 
 
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(all_sprites, wall_group)
-        self.image = pygame.Surface((title_width - 5, title_height - 5))
-        pygame.draw.rect(self.image, pygame.Color('Blue'),
-                         (0, 0, title_width - 5, title_height - 5), 2)
+        self.image = pygame.Surface((title_width - 3, title_height - 3))
+        pygame.draw.rect(self.image, pygame.Color('Blue'), (0, 0, title_width - 3, title_height - 3), 2)
         self.rect = self.image.get_rect().move(title_width * x,
                                                title_height * y)
 
@@ -454,32 +466,39 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
                 for i in player_group:
-                    if not i.wall(6, 0):
+                    if not i.wall(6, 0) and prev_pac_man != 'right':
                         player_group = pygame.sprite.Group()
                         Player(pygame.image.load('data/Pac-man_right.png'), 3, 1,
                                coord_x / title_width, coord_y / title_height, 6, 0)
+                        prev_pac_man = 'right'
+                        rotate_pacman = False
 
             if event.key == pygame.K_DOWN:
                 for i in player_group:
-                    if not i.wall(0, 6):
+                    if not i.wall(0, 6) and prev_pac_man != 'down':
                         player_group = pygame.sprite.Group()
                         Player(pygame.image.load('data/Pac-man_down.png'), 1, 3,
                                coord_x / title_width, coord_y / title_height, 0, 6)
+                        prev_pac_man = 'down'
+                        rotate_pacman = False
 
             if event.key == pygame.K_LEFT:
                 for i in player_group:
-                    if not i.wall(-6, 0):
+                    if not i.wall(-6, 0) and prev_pac_man != 'left':
                         player_group = pygame.sprite.Group()
                         Player(pygame.image.load('data/Pac-man_left.png'), 3, 1,
                                coord_x / title_width, coord_y / title_height, -6, 0)
+                        prev_pac_man = 'left'
+                        rotate_pacman = True
 
             if event.key == pygame.K_UP:
                 for i in player_group:
-                    if not i.wall(0, -6):
+                    if not i.wall(0, -6) and prev_pac_man != 'up':
                         player_group = pygame.sprite.Group()
                         Player(pygame.image.load('data/Pac-man_up.png'), 1, 3,
                                coord_x / title_width, coord_y / title_height, 0, -6)
-
+                        prev_pac_man = 'up'
+                        rotate_pacman = True
     screen.fill((0, 0, 0))
     score_counter()
     all_sprites.draw(screen)
