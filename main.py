@@ -9,8 +9,10 @@ screen = pygame.display.set_mode((width, height), )
 all_sprites = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()
 point_group = pygame.sprite.Group()
+pygame.mouse.set_visible(False)
 end_screen_enemy = pygame.sprite.Group()
 particles = pygame.sprite.Group()
+settings_group = pygame.sprite.Group()
 running = True
 title_width = 30
 gravity = 0.5
@@ -26,6 +28,11 @@ stars = ['data/star.png', 'data/green_star.png', 'data/Communist_star.png', 'dat
 rotate_pacman = False
 r, g, b = 0, 0, 0
 arr_color = [r, g, b]
+
+volume = 2
+pygame.mixer.music.load('data/pacman_beginning.mp3')
+pygame.mixer.music.play()
+pygame.mixer.music.set_volume(volume)
 
 
 def terminate():
@@ -62,6 +69,15 @@ def start_screen():
             if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
                 if cell == 2:
                     terminate()
+                if cell == 1:
+                    running = True
+                    while running:
+                        screen.fill((0, 0, 0))
+                        start_settings()
+                        pacmen_start_screen_sprites.draw(screen)
+                        enemy_start_screen_sprites.draw(screen)
+                        enemy_start_screen_sprites.update()
+                        pygame.display.flip()
                 if cell == 0:
                     running = False
             if event.key == pygame.K_DOWN:
@@ -75,6 +91,62 @@ def start_screen():
                 pacmen_start_screen_sprites.update(260, 295)
             else:
                 pacmen_start_screen_sprites.update(295, 385)
+
+
+def start_settings():
+    global cell, running
+    global volume
+    title = pygame.image.load('data/settings.png')
+    screen.blit(title, (50, 0))
+    start_screen_text = ["Увеличить громкость музыки", "",
+                         "Уменьшить громкость музыки", "",
+                         "Выход"]
+
+    font = pygame.font.Font(None, 50)
+    text_coord = 300
+    random_num = random.randrange(0, 3)
+    arr_color[random_num] = (arr_color[random_num] + 9) % 255
+
+    for string in start_screen_text:
+        line_rendered = font.render(string, 1, (arr_color[0], arr_color[1], arr_color[2]))
+        intro_rect = line_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = width // 2 - line_rendered.get_width() // 2
+        text_coord += intro_rect.height
+        screen.blit(line_rendered, intro_rect)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            terminate()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
+                if cell == 2:
+                    running = True
+                    while running:
+                        screen.fill((0, 0, 0))
+                        start_screen()
+                        pacmen_start_screen_sprites.draw(screen)
+                        enemy_start_screen_sprites.draw(screen)
+                        enemy_start_screen_sprites.update()
+                        pygame.display.flip()
+                if cell == 1:
+                    volume -= 0.1
+                    pygame.mixer.music.set_volume(volume)
+                if cell == 0:
+                    volume += 0.1
+                    pygame.mixer.music.set_volume(volume)
+            if event.key == pygame.K_DOWN:
+                cell = (cell + 1) % 3
+            if event.key == pygame.K_UP:
+                cell = (cell - 1) % 3
+
+            if cell == 0:
+                pacmen_start_screen_sprites.update(100, 310)
+            if cell == 1:
+                pacmen_start_screen_sprites.update(100, 400)
+            if cell == 2:
+                pacmen_start_screen_sprites.update(250, 500)
 
 
 def end_screen(fl):
@@ -97,7 +169,6 @@ class Particle(pygame.sprite.Sprite):
     for scale in (range(30)):
         fire.append(pygame.transform.scale(pygame.image.load(random.choice(stars)),
                                            (scale, scale)))
-
 
     def __init__(self, pos, dx, dy):
         super().__init__(particles)
@@ -492,7 +563,8 @@ while running:
                     for i in player_group:
                         if not i.wall(15, 0) and prev_pac_man != 'right':
                             player_group = pygame.sprite.Group()
-                            Player(pygame.image.load('data/Pac-man_right.png').convert_alpha(), 3, 1,
+                            Player(pygame.image.load('data/Pac-man_right.png').convert_alpha(), 3,
+                                   1,
                                    coord_x / title_width, coord_y / title_height, 6, 0)
                             prev_pac_man = 'right'
                             rotate_pacman = False
@@ -561,7 +633,6 @@ while running:
         screen2.set_alpha(7)
         screen.blit(screen2, (0, 0))
         pygame.display.flip()
-    break
 
 running = True
 End_screen_enemies(pygame.image.load('data/end_screen_error.png').convert_alpha(), 2, 1, 0, 516)
