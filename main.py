@@ -230,8 +230,8 @@ class Player(pygame.sprite.Sprite):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
         if self.rect.x < 0:
-            self.rect.x = 841
-        if self.rect.x > 841:
+            self.rect.x = 830
+        if self.rect.x > 830:
             self.rect.x = 0
         if x == 0 and y == 0:
             self.rect.x += self.speed_x
@@ -266,8 +266,6 @@ class Player(pygame.sprite.Sprite):
                 return
         if pygame.sprite.spritecollide(self, point_group, True):
             score_count += 10
-            wall_group = pygame.sprite.Group()
-            generate_level(load_level('rainbow_level.txt'))
         coord_x = self.rect.x
         coord_y = self.rect.y
 
@@ -295,11 +293,10 @@ class Player(pygame.sprite.Sprite):
 
 
 class Wall(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, color=(0, 0, 0)):
         super().__init__(wall_group)
         self.image = pygame.Surface((title_width - 6, title_height - 6))
-        pygame.draw.rect(self.image, (random.randrange(0, 255), random.randrange(0, 255),
-                                      random.randrange(0, 255)),
+        pygame.draw.rect(self.image, color,
                          (0, 0, title_width - 6, title_height - 6), 2)
         self.rect = self.image.get_rect().move(title_width * x,
                                                title_height * y)
@@ -310,8 +307,11 @@ class Point(pygame.sprite.Sprite):
         super().__init__(all_sprites, point_group)
         self.image = pygame.Surface((title_width - 10, title_height - 10))
         pygame.draw.circle(self.image, (255, 255, 173), (15, 15), 5, 0)
-        self.rect = self.image.get_rect().move(title_width * x,
+        self.rect = self.image.get_rect().move(title_width * x - 3,
                                                title_height * y)
+
+
+attemp = 0
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -353,7 +353,6 @@ class Enemy(pygame.sprite.Sprite):
                 Wall(13, 13)
                 Wall(14, 13)
         elif self.start_enemy_motion and not pygame.sprite.spritecollideany(self, wall_group):
-
             if self.rect.x > 402:
                 self.rect.x -= 6
             else:
@@ -361,7 +360,7 @@ class Enemy(pygame.sprite.Sprite):
         elif not self.start_enemy_motion:
             Wall(13, 13)
             Wall(14, 13)
-            if attemp < 17:
+            if attemp < 20:
                 self.way_enemy = random.choice(['up', 'left', 'right'])
                 attemp += 1
             if self.way_enemy == 'down':
@@ -423,11 +422,16 @@ class Enemy(pygame.sprite.Sprite):
         if pygame.sprite.spritecollideany(self, player_group):
             fl_death = True
 
+
 def load_level(filename):
     filename = 'data/' + filename
     with open(filename, 'r') as mapFile:
         level_map = [line for line in mapFile]
     return level_map
+
+
+r, g, b = (random.randrange(0, 255), random.randrange(0, 255),
+           random.randrange(0, 255))
 
 
 def generate_level(level):
@@ -436,7 +440,7 @@ def generate_level(level):
             if level[y][x] == '.':
                 Point(x, y)
             if level[y][x] == '#':
-                Wall(x, y)
+                Wall(x, y, (r, g, b))
             if level[y][x] == '@':
                 Player(pygame.image.load('data/Pac-man_right.png'), 3, 1, x, y)
     for y in range(len(level)):
@@ -446,8 +450,8 @@ def generate_level(level):
                                              'data/blue_enemy',
                                              'data/pink_enemy',
                                              'data/red_enemy'])
-                Enemy(pygame.image.load(color_enemy + '_right.png'), color_enemy,
-                        2, 1, x, y)
+                Enemy(pygame.image.load(color_enemy + '_right.png').convert_alpha(), color_enemy,
+                      2, 1, x, y)
 
 
 pacmen_start_screen_sprites = pygame.sprite.Group()
@@ -459,7 +463,7 @@ left_enemy_group = pygame.sprite.Group()
 PacmenStart()
 start_screen()
 generate_level(load_level('level.txt'))
-Startmenuenemy(pygame.image.load('data/start_enemy.png'), 4, 1, 0, 800)
+Startmenuenemy(pygame.image.load('data/start_enemy.png').convert_alpha(), 4, 1, 0, 800)
 
 while running:
     screen.fill((0, 0, 0))
@@ -469,61 +473,91 @@ while running:
     enemy_start_screen_sprites.update()
     pygame.display.flip()
 
+pause = False
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             terminate()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RIGHT:
-                for i in player_group:
-                    if not i.wall(6, 0) and prev_pac_man != 'right':
-                        player_group = pygame.sprite.Group()
-                        Player(pygame.image.load('data/Pac-man_right.png'), 3, 1,
-                               coord_x / title_width, coord_y / title_height, 6, 0)
-                        prev_pac_man = 'right'
-                        rotate_pacman = False
+        if not pause:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    for i in player_group:
+                        if not i.wall(15, 0) and prev_pac_man != 'right':
+                            player_group = pygame.sprite.Group()
+                            Player(pygame.image.load('data/Pac-man_right.png').convert_alpha(), 3, 1,
+                                   coord_x / title_width, coord_y / title_height, 6, 0)
+                            prev_pac_man = 'right'
+                            rotate_pacman = False
 
-            if event.key == pygame.K_DOWN:
-                for i in player_group:
-                    if not i.wall(0, 6) and prev_pac_man != 'down':
-                        player_group = pygame.sprite.Group()
-                        Player(pygame.image.load('data/Pac-man_down.png'), 1, 3,
-                               coord_x / title_width, coord_y / title_height, 0, 6)
-                        prev_pac_man = 'down'
-                        rotate_pacman = False
+                if event.key == pygame.K_DOWN:
+                    for i in player_group:
+                        if not i.wall(0, 15) and prev_pac_man != 'down':
+                            player_group = pygame.sprite.Group()
+                            Player(pygame.image.load('data/Pac-man_down.png').convert_alpha(), 1, 3,
+                                   coord_x / title_width, coord_y / title_height, 0, 6)
+                            prev_pac_man = 'down'
+                            rotate_pacman = False
 
-            if event.key == pygame.K_LEFT:
-                for i in player_group:
-                    if not i.wall(-6, 0) and prev_pac_man != 'left':
-                        player_group = pygame.sprite.Group()
-                        Player(pygame.image.load('data/Pac-man_left.png'), 3, 1,
-                               coord_x / title_width, coord_y / title_height, -6, 0)
-                        prev_pac_man = 'left'
-                        rotate_pacman = True
+                if event.key == pygame.K_LEFT:
+                    for i in player_group:
+                        if not i.wall(-15, 0) and prev_pac_man != 'left':
+                            player_group = pygame.sprite.Group()
+                            Player(pygame.image.load('data/Pac-man_left.png').convert_alpha(), 3, 1,
+                                   coord_x / title_width, coord_y / title_height, -6, 0)
+                            prev_pac_man = 'left'
+                            rotate_pacman = True
 
-            if event.key == pygame.K_UP:
-                for i in player_group:
-                    if not i.wall(0, -6) and prev_pac_man != 'up':
-                        player_group = pygame.sprite.Group()
-                        Player(pygame.image.load('data/Pac-man_up.png'), 1, 3,
-                               coord_x / title_width, coord_y / title_height, 0, -6)
-                        prev_pac_man = 'up'
-                        rotate_pacman = True
-    screen.fill((0, 0, 0))
-    score_counter()
-    all_sprites.draw(screen)
-    wall_group.draw(screen)
-    time.sleep(0.06)
-    player_group.update()
-    left_enemy_group.update()
-    pygame.display.flip()
-    if fl_death is True or len(point_group) == 0:
-        running = False
+                if event.key == pygame.K_UP:
+                    for i in player_group:
+                        if not i.wall(0, -15) and prev_pac_man != 'up':
+                            player_group = pygame.sprite.Group()
+                            Player(pygame.image.load('data/Pac-man_up.png').convert_alpha(), 1, 3,
+                                   coord_x / title_width, coord_y / title_height, 0, -6)
+                            prev_pac_man = 'up'
+                            rotate_pacman = True
+
+                if event.key == pygame.K_ESCAPE:
+                    pause = True
+
+
+        else:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pause = False
+    if not pause:
+        random_number = random.randrange(0, 3)
+        if random_number == 0:
+            r += random.randrange(0, 30)
+        elif random_number == 1:
+            g += random.randrange(0, 30)
+        else:
+            b += random.randrange(0, 30)
+        wall_group = pygame.sprite.Group()
+        if r > 255 or b > 255 or g > 255:
+            r, g, b = (random.randrange(0, 60), random.randrange(0, 60),
+                       random.randrange(0, 60))
+        screen.fill((0, 0, 0))
+        generate_level(load_level('rainbow_level.txt'))
+        score_counter()
+        all_sprites.draw(screen)
+        wall_group.draw(screen)
+        time.sleep(0.06)
+        player_group.update()
+        left_enemy_group.update()
+        pygame.display.flip()
+        if fl_death is True or len(point_group) == 0:
+            running = False
+    else:
+        screen2 = pygame.Surface((width, height))
+        screen2.set_colorkey((255, 255, 255))
+        screen2.set_alpha(7)
+        screen.blit(screen2, (0, 0))
+        pygame.display.flip()
 
 running = True
-End_screen_enemies(pygame.image.load('data/end_screen_error.png'), 2, 1, 0, 516)
-End_screen_enemies(pygame.image.load('data/end_screen_error2.png'), 2, 1, 0, 290)
+End_screen_enemies(pygame.image.load('data/end_screen_error.png').convert_alpha(), 2, 1, 0, 516)
+End_screen_enemies(pygame.image.load('data/end_screen_error2.png').convert_alpha(), 2, 1, 0, 290)
 
 while running:
     for event in pygame.event.get():
