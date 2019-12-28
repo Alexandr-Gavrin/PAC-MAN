@@ -114,7 +114,7 @@ class Particle(pygame.sprite.Sprite):
 
 def create_particles(position, count):
     numbers = range(-5, 6)
-    for _ in range(count):
+    for i in range(count):
         Particle(position, random.choice(numbers), random.choice(numbers))
 
 
@@ -246,7 +246,6 @@ class Player(pygame.sprite.Sprite):
                 self.cur_frame = 2
                 if rotate_pacman:
                     self.cur_frame = 1
-
         else:
             self.speed_x = x
             self.speed_y = y
@@ -265,7 +264,6 @@ class Player(pygame.sprite.Sprite):
                 self.prev_speed_x = self.speed_x
                 self.prev_speed_y = self.speed_y
                 return
-
         if pygame.sprite.spritecollide(self, point_group, True):
             score_count += 10
             wall_group = pygame.sprite.Group()
@@ -314,9 +312,6 @@ class Point(pygame.sprite.Sprite):
         pygame.draw.circle(self.image, (255, 255, 173), (15, 15), 5, 0)
         self.rect = self.image.get_rect().move(title_width * x,
                                                title_height * y)
-
-
-attemp = 0
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -428,7 +423,6 @@ class Enemy(pygame.sprite.Sprite):
         if pygame.sprite.spritecollideany(self, player_group):
             fl_death = True
 
-
 def load_level(filename):
     filename = 'data/' + filename
     with open(filename, 'r') as mapFile:
@@ -483,7 +477,7 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
                 for i in player_group:
-                    if not i.wall(15, 0) and prev_pac_man != 'right':
+                    if not i.wall(6, 0) and prev_pac_man != 'right':
                         player_group = pygame.sprite.Group()
                         Player(pygame.image.load('data/Pac-man_right.png'), 3, 1,
                                coord_x / title_width, coord_y / title_height, 6, 0)
@@ -492,7 +486,7 @@ while running:
 
             if event.key == pygame.K_DOWN:
                 for i in player_group:
-                    if not i.wall(0, 15) and prev_pac_man != 'down':
+                    if not i.wall(0, 6) and prev_pac_man != 'down':
                         player_group = pygame.sprite.Group()
                         Player(pygame.image.load('data/Pac-man_down.png'), 1, 3,
                                coord_x / title_width, coord_y / title_height, 0, 6)
@@ -501,7 +495,7 @@ while running:
 
             if event.key == pygame.K_LEFT:
                 for i in player_group:
-                    if not i.wall(-15, 0) and prev_pac_man != 'left':
+                    if not i.wall(-6, 0) and prev_pac_man != 'left':
                         player_group = pygame.sprite.Group()
                         Player(pygame.image.load('data/Pac-man_left.png'), 3, 1,
                                coord_x / title_width, coord_y / title_height, -6, 0)
@@ -510,13 +504,12 @@ while running:
 
             if event.key == pygame.K_UP:
                 for i in player_group:
-                    if not i.wall(0, -15) and prev_pac_man != 'up':
+                    if not i.wall(0, -6) and prev_pac_man != 'up':
                         player_group = pygame.sprite.Group()
                         Player(pygame.image.load('data/Pac-man_up.png'), 1, 3,
                                coord_x / title_width, coord_y / title_height, 0, -6)
                         prev_pac_man = 'up'
                         rotate_pacman = True
-
     screen.fill((0, 0, 0))
     score_counter()
     all_sprites.draw(screen)
