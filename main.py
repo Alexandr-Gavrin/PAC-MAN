@@ -22,6 +22,7 @@ coord_y = 0
 fl_death = False
 screen_rect = (0, 0, width, height)
 prev_pac_man = 'right'
+stars = ['data/star.png', 'data/green_star.png', 'data/Communist_star.png', 'data/red_star.png']
 rotate_pacman = False
 r, g, b = 0, 0, 0
 arr_color = [r, g, b]
@@ -91,9 +92,12 @@ def end_screen(fl):
 
 
 class Particle(pygame.sprite.Sprite):
-    fire = [pygame.image.load("data/star.png")]
-    for scale in (5, 10, 20):
-        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
+    global stars
+    fire = []
+    for scale in (range(30)):
+        fire.append(pygame.transform.scale(pygame.image.load(random.choice(stars)),
+                                           (scale, scale)))
+
 
     def __init__(self, pos, dx, dy):
         super().__init__(particles)
@@ -352,6 +356,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.start_enemy_motion = False
                 Wall(13, 13)
                 Wall(14, 13)
+                wall_group.draw(screen)
         elif self.start_enemy_motion and not pygame.sprite.spritecollideany(self, wall_group):
             if self.rect.x > 402:
                 self.rect.x -= 6
@@ -360,6 +365,8 @@ class Enemy(pygame.sprite.Sprite):
         elif not self.start_enemy_motion:
             Wall(13, 13)
             Wall(14, 13)
+            wall_group.draw(screen)
+
             if attemp < 20:
                 self.way_enemy = random.choice(['up', 'left', 'right'])
                 attemp += 1
@@ -554,6 +561,7 @@ while running:
         screen2.set_alpha(7)
         screen.blit(screen2, (0, 0))
         pygame.display.flip()
+    break
 
 running = True
 End_screen_enemies(pygame.image.load('data/end_screen_error.png').convert_alpha(), 2, 1, 0, 516)
