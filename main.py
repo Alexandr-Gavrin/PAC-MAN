@@ -25,6 +25,7 @@ prev_pac_man = 'right'
 rotate_pacman = False
 r, g, b = 0, 0, 0
 arr_color = [r, g, b]
+stars = ['data/star.png', 'data/green_star.png', 'data/Communist_star.png', 'data/red_star.png']
 
 
 def terminate():
@@ -85,15 +86,17 @@ def end_screen(fl):
     else:
         win_image = pygame.image.load('data/win.png')
         screen.blit(win_image, (275, 325))
-        create_particles((random.randint(0, 800), 0), random.randint(0, 5))
+        create_particles((random.randint(0, 800), 0), random.randint(1, 5))
         particles.draw(screen)
         particles.update()
 
 
 class Particle(pygame.sprite.Sprite):
-    fire = [pygame.image.load("data/star.png")]
+    global stars
+    fire = []
     for scale in (5, 10, 20):
-        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
+        fire.append(pygame.transform.scale(pygame.image.load(random.choice(stars)),
+                                           (scale, scale)))
 
     def __init__(self, pos, dx, dy):
         super().__init__(particles)
@@ -114,7 +117,7 @@ class Particle(pygame.sprite.Sprite):
 
 def create_particles(position, count):
     numbers = range(-5, 6)
-    for _ in range(count):
+    for i in range(count):
         Particle(position, random.choice(numbers), random.choice(numbers))
 
 
@@ -298,7 +301,8 @@ class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(all_sprites, wall_group)
         self.image = pygame.Surface((title_width - 3, title_height - 3))
-        pygame.draw.rect(self.image, pygame.Color('Blue'), (0, 0, title_width - 3, title_height - 3), 2)
+        pygame.draw.rect(self.image, pygame.Color('Blue'),
+                         (0, 0, title_width - 3, title_height - 3), 2)
         self.rect = self.image.get_rect().move(title_width * x,
                                                title_height * y)
 
