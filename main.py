@@ -151,7 +151,6 @@ def start_settings():
                     push_enter = True
                     push_enter_level = False
             if event.key == pygame.K_LEFT and push_enter:
-                print(volume)
                 if float(volume) != 0.0:
                     volume_float = []
                     for i in str(float(volume)):
@@ -167,6 +166,7 @@ def start_settings():
                     for i in range(len(volume_float)):
                         volume_float[i] = str(volume_float[i])
                     volume = ''.join(volume_float)
+                    volume = float(volume)
                 pygame.mixer.music.set_volume(float(volume))
             elif event.key == pygame.K_RIGHT and push_enter:
                 if float(volume) != 1.0:
@@ -184,6 +184,7 @@ def start_settings():
                     for i in range(len(volume_float)):
                         volume_float[i] = str(volume_float[i])
                     volume = ''.join(volume_float)
+                    volume = float(volume)
                 pygame.mixer.music.set_volume(float(volume))
             elif event.key == pygame.K_RIGHT and push_enter_level:
                 if level != 2:
