@@ -22,6 +22,7 @@ cell = 0
 coord_x = 0
 coord_y = 0
 fl_death = False
+win_music = False
 screen_rect = (0, 0, width, height)
 prev_pac_man = 'right'
 stars = ['data/star.png', 'data/green_star.png', 'data/Communist_star.png', 'data/red_star.png']
@@ -150,12 +151,19 @@ def start_settings():
 
 
 def end_screen(fl):
+    global win_music
     if fl:
         game_over_image = pygame.image.load('data/game_over.png')
         screen.blit(game_over_image, (225, 325))
         end_screen_enemy.draw(screen)
         end_screen_enemy.update()
     else:
+        if not win_music:
+            music_win = random.choice(['data/sound_win.mp3', 'data/sound_win_2.mp3'])
+            pygame.mixer.music.load(music_win)
+            pygame.mixer.music.play()
+            pygame.mixer.music.set_volume(volume)
+            win_music = True
         win_image = pygame.image.load('data/win.png')
         screen.blit(win_image, (275, 325))
         create_particles((random.randint(0, 800), 0), random.randint(0, 5))
@@ -498,6 +506,10 @@ class Enemy(pygame.sprite.Sprite):
                     self.way_enemy = random.choice(['down', 'up', 'left', 'right'])
 
         if pygame.sprite.spritecollideany(self, player_group):
+            global volume
+            pygame.mixer.music.load('data/game_over.mp3')
+            pygame.mixer.music.play()
+            pygame.mixer.music.set_volume(volume)
             fl_death = True
 
 
