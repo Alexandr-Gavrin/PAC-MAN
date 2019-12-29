@@ -13,6 +13,7 @@ pygame.mouse.set_visible(False)
 end_screen_enemy = pygame.sprite.Group()
 particles = pygame.sprite.Group()
 settings_group = pygame.sprite.Group()
+change_value = pygame.sprite.Group()
 running = True
 title_width = 30
 gravity = 0.5
@@ -27,10 +28,15 @@ screen_rect = (0, 0, width, height)
 prev_pac_man = 'right'
 stars = ['data/star.png', 'data/green_star.png', 'data/Communist_star.png', 'data/red_star.png']
 rotate_pacman = False
+change_coord_pacman_menu = False
+push_enter = False
+push_enter_level = False
+is_load_level = False
 r, g, b = 0, 0, 0
+level = 1
 arr_color = [r, g, b]
 
-volume = 2
+volume = 1
 pygame.mixer.music.load('data/pacman_beginning.mp3')
 pygame.mixer.music.play()
 pygame.mixer.music.set_volume(volume)
@@ -42,7 +48,7 @@ def terminate():
 
 
 def start_screen():
-    global cell, running
+    global cell, running, level, is_load_level
     title = pygame.image.load('data/title.png')
     screen.blit(title, (200, 0))
     start_screen_text = ["Начать", "",
@@ -80,6 +86,9 @@ def start_screen():
                         enemy_start_screen_sprites.update()
                         pygame.display.flip()
                 if cell == 0:
+                    if not is_load_level:
+                        generate_level(load_level('level_' + str(level) + '.txt'))
+                        is_load_level = True
                     running = False
             if event.key == pygame.K_DOWN:
                 cell = (cell + 1) % 3
@@ -95,16 +104,18 @@ def start_screen():
 
 
 def start_settings():
-    global cell, running
-    global volume
+    global cell, running, change_coord_pacman_menu, volume, push_enter, level, push_enter_level
+    if not change_coord_pacman_menu:
+        pacmen_start_screen_sprites.update(130, 295)
+        change_coord_pacman_menu = True
     title = pygame.image.load('data/settings.png')
-    screen.blit(title, (50, 0))
-    start_screen_text = ["Увеличить громкость музыки", "",
-                         "Уменьшить громкость музыки", "",
+    screen.blit(title, (0, 0))
+    start_screen_text = ["Громкость    " + str(volume), "",
+                         "Уровень сложности   " + str(level), "",
                          "Выход"]
 
     font = pygame.font.Font(None, 50)
-    text_coord = 300
+    text_coord = 200
     random_num = random.randrange(0, 3)
     arr_color[random_num] = (arr_color[random_num] + 9) % 255
 
@@ -124,6 +135,8 @@ def start_settings():
             if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
                 if cell == 2:
                     running = True
+                    push_enter = False
+                    push_enter_level = False
                     while running:
                         screen.fill((0, 0, 0))
                         start_screen()
@@ -132,22 +145,63 @@ def start_settings():
                         enemy_start_screen_sprites.update()
                         pygame.display.flip()
                 if cell == 1:
-                    volume -= 0.1
-                    pygame.mixer.music.set_volume(volume)
+                    push_enter = False
+                    push_enter_level = True
                 if cell == 0:
-                    volume += 0.1
-                    pygame.mixer.music.set_volume(volume)
-            if event.key == pygame.K_DOWN:
+                    push_enter = True
+                    push_enter_level = False
+            if event.key == pygame.K_LEFT and push_enter:
+                print(volume)
+                if float(volume) != 0.0:
+                    volume_float = []
+                    for i in str(float(volume)):
+                        try:
+                            volume_float.append(int(i))
+                        except ValueError:
+                            volume_float.append(i)
+                    if volume_float[0] == 1:
+                        volume_float[0] -= 1
+                        volume_float[2] += 9
+                    else:
+                        volume_float[2] -= 1
+                    for i in range(len(volume_float)):
+                        volume_float[i] = str(volume_float[i])
+                    volume = ''.join(volume_float)
+                pygame.mixer.music.set_volume(float(volume))
+            elif event.key == pygame.K_RIGHT and push_enter:
+                if float(volume) != 1.0:
+                    volume_float = []
+                    for i in str(float(volume)):
+                        try:
+                            volume_float.append(int(i))
+                        except ValueError:
+                            volume_float.append(i)
+                    if volume_float[2] == 9:
+                        volume_float[0] += 1
+                        volume_float[2] -= 9
+                    else:
+                        volume_float[2] += 1
+                    for i in range(len(volume_float)):
+                        volume_float[i] = str(volume_float[i])
+                    volume = ''.join(volume_float)
+                pygame.mixer.music.set_volume(float(volume))
+            elif event.key == pygame.K_RIGHT and push_enter_level:
+                if level != 2:
+                    level += 1
+            elif event.key == pygame.K_LEFT and push_enter_level:
+                if level != 0:
+                    level -= 1
+            elif event.key == pygame.K_DOWN:
                 cell = (cell + 1) % 3
-            if event.key == pygame.K_UP:
+            elif event.key == pygame.K_UP:
                 cell = (cell - 1) % 3
 
             if cell == 0:
-                pacmen_start_screen_sprites.update(100, 310)
-            if cell == 1:
-                pacmen_start_screen_sprites.update(100, 400)
-            if cell == 2:
-                pacmen_start_screen_sprites.update(250, 500)
+                pacmen_start_screen_sprites.update(230, 205)
+            elif cell == 1:
+                pacmen_start_screen_sprites.update(130, 295)
+            else:
+                pacmen_start_screen_sprites.update(260, 385)
 
 
 def end_screen(fl):
@@ -542,6 +596,13 @@ def generate_level(level):
                                              'data/red_enemy'])
                 Enemy(pygame.image.load(color_enemy + '_right.png').convert_alpha(), color_enemy,
                       2, 1, x, y)
+            if level[y][x] == '%':
+                color_enemy = random.choice(['data/orange_enemy',
+                                             'data/blue_enemy',
+                                             'data/pink_enemy',
+                                             'data/red_enemy'])
+                Enemy(pygame.image.load(color_enemy + '_left.png').convert_alpha(), color_enemy,
+                      2, 1, x, y)
 
 
 pacmen_start_screen_sprites = pygame.sprite.Group()
@@ -552,7 +613,6 @@ left_enemy_group = pygame.sprite.Group()
 
 PacmenStart()
 start_screen()
-generate_level(load_level('level.txt'))
 Startmenuenemy(pygame.image.load('data/start_enemy.png').convert_alpha(), 4, 1, 0, 800)
 
 while running:
