@@ -29,8 +29,6 @@ prev_pac_man = 'right'
 stars = ['data/star.png', 'data/green_star.png', 'data/Communist_star.png', 'data/red_star.png']
 rotate_pacman = False
 change_coord_pacman_menu = False
-push_enter = False
-push_enter_level = False
 is_load_level = False
 r, g, b = 0, 0, 0
 level = 1
@@ -135,8 +133,6 @@ def start_settings():
             if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
                 if cell == 2:
                     running = True
-                    push_enter = False
-                    push_enter_level = False
                     while running:
                         screen.fill((0, 0, 0))
                         start_screen()
@@ -144,13 +140,7 @@ def start_settings():
                         enemy_start_screen_sprites.draw(screen)
                         enemy_start_screen_sprites.update()
                         pygame.display.flip()
-                if cell == 1:
-                    push_enter = False
-                    push_enter_level = True
-                if cell == 0:
-                    push_enter = True
-                    push_enter_level = False
-            if event.key == pygame.K_LEFT and push_enter:
+            if event.key == pygame.K_LEFT and cell == 0:
                 if float(volume) != 0.0:
                     volume_float = []
                     for i in str(float(volume)):
@@ -168,7 +158,7 @@ def start_settings():
                     volume = ''.join(volume_float)
                     volume = float(volume)
                 pygame.mixer.music.set_volume(float(volume))
-            elif event.key == pygame.K_RIGHT and push_enter:
+            elif event.key == pygame.K_RIGHT and cell == 0:
                 if float(volume) != 1.0:
                     volume_float = []
                     for i in str(float(volume)):
@@ -186,10 +176,10 @@ def start_settings():
                     volume = ''.join(volume_float)
                     volume = float(volume)
                 pygame.mixer.music.set_volume(float(volume))
-            elif event.key == pygame.K_RIGHT and push_enter_level:
+            elif event.key == pygame.K_RIGHT and cell == 1:
                 if level != 2:
                     level += 1
-            elif event.key == pygame.K_LEFT and push_enter_level:
+            elif event.key == pygame.K_LEFT and cell == 1:
                 if level != 0:
                     level -= 1
             elif event.key == pygame.K_DOWN:
