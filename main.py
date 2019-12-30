@@ -85,7 +85,7 @@ def start_screen():
                         pygame.display.flip()
                 if cell == 0:
                     if not is_load_level:
-                        generate_level(load_level('level_' + str(level) + '.txt'))
+                        generate_level(load_level('level.txt'))
                         is_load_level = True
                     running = False
             if event.key == pygame.K_DOWN:
@@ -180,7 +180,7 @@ def start_settings():
                 if level != 2:
                     level += 1
             elif event.key == pygame.K_LEFT and cell == 1:
-                if level != 0:
+                if level != 1:
                     level -= 1
             elif event.key == pygame.K_DOWN:
                 cell = (cell + 1) % 3
@@ -444,6 +444,7 @@ attemp = 0
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, sheet, color, columns, rows, x, y):
+        global level
         super().__init__(all_sprites, left_enemy_group)
         self.frames = []
         self.color_enemy = color
@@ -453,6 +454,10 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.rect.move(x * title_width, y * title_width)
         self.speed_x = 6
         self.speed_y = 0
+        if level == 2:
+            self.speed_enemy = 8
+        else:
+            self.speed_enemy = 6
         self.way_enemy = None
         self.start_enemy_motion = True
         self.mask = pygame.mask.from_surface(self.image)
@@ -503,9 +508,9 @@ class Enemy(pygame.sprite.Sprite):
                 self.image = self.frames[self.cur_frame]
                 self.rect.x = self.x_coord
                 self.rect.y = self.y_coord
-                self.rect.y += 6
+                self.rect.y += self.speed_enemy
                 if pygame.sprite.spritecollideany(self, wall_group):
-                    self.rect.y -= 6
+                    self.rect.y -= self.speed_enemy
                     self.way_enemy = random.choice(['down', 'up', 'left', 'right'])
 
             if self.way_enemy == 'up':
@@ -517,9 +522,9 @@ class Enemy(pygame.sprite.Sprite):
                 self.image = self.frames[self.cur_frame]
                 self.rect.x = self.x_coord
                 self.rect.y = self.y_coord
-                self.rect.y -= 6
+                self.rect.y -= self.speed_enemy
                 if pygame.sprite.spritecollideany(self, wall_group):
-                    self.rect.y += 6
+                    self.rect.y += self.speed_enemy
                     self.way_enemy = random.choice(['down', 'up', 'left', 'right'])
 
             if self.way_enemy == 'left':
@@ -531,9 +536,9 @@ class Enemy(pygame.sprite.Sprite):
                 self.image = self.frames[self.cur_frame]
                 self.rect.x = self.x_coord
                 self.rect.y = self.y_coord
-                self.rect.x -= 6
+                self.rect.x -= self.speed_enemy
                 if pygame.sprite.spritecollideany(self, wall_group):
-                    self.rect.x += 6
+                    self.rect.x += self.speed_enemy
                     self.way_enemy = random.choice(['down', 'up', 'left', 'right'])
 
             if self.way_enemy == 'right':
@@ -545,9 +550,9 @@ class Enemy(pygame.sprite.Sprite):
                 self.image = self.frames[self.cur_frame]
                 self.rect.x = self.x_coord
                 self.rect.y = self.y_coord
-                self.rect.x += 6
+                self.rect.x += self.speed_enemy
                 if pygame.sprite.spritecollideany(self, wall_group):
-                    self.rect.x -= 6
+                    self.rect.x -= self.speed_enemy
                     self.way_enemy = random.choice(['down', 'up', 'left', 'right'])
 
         if pygame.sprite.spritecollideany(self, player_group):
@@ -661,11 +666,13 @@ while running:
 
                 if event.key == pygame.K_ESCAPE:
                     pause = True
+                    pygame.mixer.music.pause()
 
 
         else:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
+                    pygame.mixer.music.unpause()
                     pause = False
     if not pause:
         random_number = random.randrange(0, 3)
