@@ -455,7 +455,7 @@ class Enemy(pygame.sprite.Sprite):
         self.speed_x = 6
         self.speed_y = 0
         if level == 2:
-            self.speed_enemy = 8
+            self.speed_enemy = 10
         else:
             self.speed_enemy = 6
         self.way_enemy = None
