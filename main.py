@@ -17,6 +17,7 @@ change_value = pygame.sprite.Group()
 running = True
 title_width = 30
 gravity = 0.5
+settings_running = False
 title_height = 30
 score_count = 0
 cell = 0
@@ -77,7 +78,7 @@ def start_screen():
                     terminate()
                 if cell == 1:
                     settings_running = True
-                    while running:
+                    while settings_running:
                         screen.fill((0, 0, 0))
                         start_settings()
                         pacmen_start_screen_sprites.draw(screen)
@@ -104,7 +105,9 @@ def start_screen():
 
 
 def start_settings():
-    global cell, running, change_coord_pacman_menu, volume, push_enter, level, push_enter_level
+    global cell, running, change_coord_pacman_menu, volume,\
+        push_enter, level, push_enter_level, settings_running
+
     if not change_coord_pacman_menu:
         pacmen_start_screen_sprites.update(110, 295)
         change_coord_pacman_menu = True
@@ -134,14 +137,7 @@ def start_settings():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
                 if cell == 2:
-                    running = True
-                    while running:
-                        screen.fill((0, 0, 0))
-                        start_screen()
-                        pacmen_start_screen_sprites.draw(screen)
-                        enemy_start_screen_sprites.draw(screen)
-                        enemy_start_screen_sprites.update()
-                        pygame.display.flip()
+                    settings_running = False
             if event.key == pygame.K_LEFT and cell == 0:
                 if float(volume) != 0.0:
                     volume_float = []
