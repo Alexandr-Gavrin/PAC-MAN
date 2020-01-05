@@ -17,6 +17,7 @@ change_value = pygame.sprite.Group()
 running = True
 title_width = 30
 gravity = 0.5
+settings_running = False
 title_height = 30
 score_count = 0
 cell = 0
@@ -31,6 +32,7 @@ rotate_pacman = False
 change_coord_pacman_menu = False
 is_load_level = False
 r, g, b = 0, 0, 0
+level = 1
 level = 'Лёгкий'
 arr_color = [r, g, b]
 
@@ -46,7 +48,7 @@ def terminate():
 
 
 def start_screen():
-    global cell, running, level, is_load_level
+    global cell, menu_running, level, is_load_level, game_running, settings_running
     title = pygame.image.load('data/title.png')
     screen.blit(title, (200, 0))
     start_screen_text = ["Начать", "",
@@ -75,8 +77,8 @@ def start_screen():
                 if cell == 2:
                     terminate()
                 if cell == 1:
-                    running = True
-                    while running:
+                    settings_running = True
+                    while settings_running:
                         screen.fill((0, 0, 0))
                         start_settings()
                         pacmen_start_screen_sprites.draw(screen)
@@ -87,7 +89,8 @@ def start_screen():
                     if not is_load_level:
                         generate_level(load_level('level.txt'))
                         is_load_level = True
-                    running = False
+                    game_running = True
+                    menu_running = False
             if event.key == pygame.K_DOWN:
                 cell = (cell + 1) % 3
             if event.key == pygame.K_UP:
@@ -102,7 +105,9 @@ def start_screen():
 
 
 def start_settings():
-    global cell, running, change_coord_pacman_menu, volume, push_enter, level, push_enter_level
+    global cell, running, change_coord_pacman_menu, volume,\
+        push_enter, level, push_enter_level, settings_running
+
     if not change_coord_pacman_menu:
         pacmen_start_screen_sprites.update(110, 295)
         change_coord_pacman_menu = True
@@ -132,14 +137,7 @@ def start_settings():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
                 if cell == 2:
-                    running = True
-                    while running:
-                        screen.fill((0, 0, 0))
-                        start_screen()
-                        pacmen_start_screen_sprites.draw(screen)
-                        enemy_start_screen_sprites.draw(screen)
-                        enemy_start_screen_sprites.update()
-                        pygame.display.flip()
+                    settings_running = False
             if event.key == pygame.K_LEFT and cell == 0:
                 if float(volume) != 0.0:
                     volume_float = []
@@ -197,6 +195,7 @@ def start_settings():
                 pacmen_start_screen_sprites.update(110, 295)
             else:
                 pacmen_start_screen_sprites.update(260, 385)
+
 
 
 def end_screen(fl):
@@ -458,7 +457,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.rect.move(x * title_width, y * title_width)
         self.speed_x = 6
         self.speed_y = 0
-        if level == 'Сложный':
+        if level == 2:
             self.speed_enemy = 10
         else:
             self.speed_enemy = 6
@@ -615,108 +614,140 @@ PacmenStart()
 start_screen()
 Startmenuenemy(pygame.image.load('data/start_enemy.png').convert_alpha(), 4, 1, 0, 800)
 
-while running:
-    screen.fill((0, 0, 0))
-    start_screen()
-    pacmen_start_screen_sprites.draw(screen)
-    enemy_start_screen_sprites.draw(screen)
-    enemy_start_screen_sprites.update()
-    pygame.display.flip()
-
+main_running = True
+menu_running = True
+settings_running = True
 pause = False
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            terminate()
-        if not pause:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    for i in player_group:
-                        if not i.wall(10, 0) and prev_pac_man != 'right':
-                            player_group = pygame.sprite.Group()
-                            Player(pygame.image.load('data/Pac-man_right.png').convert_alpha(), 3,
-                                   1,
-                                   coord_x / title_width, coord_y / title_height, 6, 0)
-                            prev_pac_man = 'right'
-                            rotate_pacman = False
+game_running = True
 
-                if event.key == pygame.K_DOWN:
-                    for i in player_group:
-                        if not i.wall(0, 10) and prev_pac_man != 'down':
-                            player_group = pygame.sprite.Group()
-                            Player(pygame.image.load('data/Pac-man_down.png').convert_alpha(), 1, 3,
-                                   coord_x / title_width, coord_y / title_height, 0, 6)
-                            prev_pac_man = 'down'
-                            rotate_pacman = False
-
-                if event.key == pygame.K_LEFT:
-                    for i in player_group:
-                        if not i.wall(-10, 0) and prev_pac_man != 'left':
-                            player_group = pygame.sprite.Group()
-                            Player(pygame.image.load('data/Pac-man_left.png').convert_alpha(), 3, 1,
-                                   coord_x / title_width, coord_y / title_height, -6, 0)
-                            prev_pac_man = 'left'
-                            rotate_pacman = True
-
-                if event.key == pygame.K_UP:
-                    for i in player_group:
-                        if not i.wall(0, -10    ) and prev_pac_man != 'up':
-                            player_group = pygame.sprite.Group()
-                            Player(pygame.image.load('data/Pac-man_up.png').convert_alpha(), 1, 3,
-                                   coord_x / title_width, coord_y / title_height, 0, -6)
-                            prev_pac_man = 'up'
-                            rotate_pacman = True
-
-                if event.key == pygame.K_ESCAPE:
-                    pause = True
-                    pygame.mixer.music.pause()
-
-
-        else:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    pygame.mixer.music.unpause()
-                    pause = False
-    if not pause:
-        random_number = random.randrange(0, 3)
-        if random_number == 0:
-            r += random.randrange(0, 30)
-        elif random_number == 1:
-            g += random.randrange(0, 30)
-        else:
-            b += random.randrange(0, 30)
-        wall_group = pygame.sprite.Group()
-        if r > 255 or b > 255 or g > 255:
-            r, g, b = (random.randrange(0, 60), random.randrange(0, 60),
-                       random.randrange(0, 60))
+while main_running:
+    while menu_running:
         screen.fill((0, 0, 0))
-        generate_level(load_level('rainbow_level.txt'))
-        score_counter()
-        all_sprites.draw(screen)
-        wall_group.draw(screen)
-        time.sleep(0.06)
-        player_group.update()
-        left_enemy_group.update()
-        pygame.display.flip()
-        if fl_death is True or len(point_group) == 0:
-            running = False
-    else:
-        screen2 = pygame.Surface((width, height))
-        screen2.set_colorkey((255, 255, 255))
-        screen2.set_alpha(7)
-        screen.blit(screen2, (0, 0))
+        start_screen()
+        pacmen_start_screen_sprites.draw(screen)
+        enemy_start_screen_sprites.draw(screen)
+        enemy_start_screen_sprites.update()
         pygame.display.flip()
 
-running = True
-End_screen_enemies(pygame.image.load('data/end_screen_error.png').convert_alpha(), 2, 1, 0, 516)
-End_screen_enemies(pygame.image.load('data/end_screen_error2.png').convert_alpha(), 2, 1, 0, 290)
+    while game_running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if not pause:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RIGHT:
+                        for i in player_group:
+                            if not i.wall(15, 0) and prev_pac_man != 'right':
+                                player_group = pygame.sprite.Group()
+                                Player(pygame.image.load('data/Pac-man_right.png').convert_alpha(), 3,
+                                       1,
+                                       coord_x / title_width, coord_y / title_height, 6, 0)
+                                prev_pac_man = 'right'
+                                rotate_pacman = False
+                    if event.key == pygame.K_DOWN:
+                        for i in player_group:
+                            if not i.wall(0, 15) and prev_pac_man != 'down':
+                                player_group = pygame.sprite.Group()
+                                Player(pygame.image.load('data/Pac-man_down.png').convert_alpha(), 1, 3,
+                                       coord_x / title_width, coord_y / title_height, 0, 6)
+                                prev_pac_man = 'down'
+                                rotate_pacman = False
+                    if event.key == pygame.K_LEFT:
+                        for i in player_group:
+                            if not i.wall(-15, 0) and prev_pac_man != 'left':
+                                player_group = pygame.sprite.Group()
+                                Player(pygame.image.load('data/Pac-man_left.png').convert_alpha(), 3, 1,
+                                       coord_x / title_width, coord_y / title_height, -6, 0)
+                                prev_pac_man = 'left'
+                                rotate_pacman = True
+                    if event.key == pygame.K_UP:
+                        for i in player_group:
+                            if not i.wall(0, -15) and prev_pac_man != 'up':
+                                player_group = pygame.sprite.Group()
+                                Player(pygame.image.load('data/Pac-man_up.png').convert_alpha(), 1, 3,
+                                       coord_x / title_width, coord_y / title_height, 0, -6)
+                                prev_pac_man = 'up'
+                                rotate_pacman = True
+                    if event.key == pygame.K_ESCAPE:
+                        pause = True
+                        pygame.mixer.music.pause()
+            else:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.mixer.music.unpause()
+                        pause = False
+        if not pause:
+            random_number = random.randrange(0, 3)
+            if random_number == 0:
+                r += random.randrange(0, 30)
+            elif random_number == 1:
+                g += random.randrange(0, 30)
+            else:
+                b += random.randrange(0, 30)
+            wall_group = pygame.sprite.Group()
+            if r > 255 or b > 255 or g > 255:
+                r, g, b = (random.randrange(0, 60), random.randrange(0, 60),
+                           random.randrange(0, 60))
+            screen.fill((0, 0, 0))
+            generate_level(load_level('rainbow_level.txt'))
+            score_counter()
+            all_sprites.draw(screen)
+            wall_group.draw(screen)
+            time.sleep(0.06)
+            player_group.update()
+            left_enemy_group.update()
+            pygame.display.flip()
+            if fl_death is True or len(point_group) == 0:
+                game_running = False
+                end_screen_running = True
+        else:
+            screen2 = pygame.Surface((width, height))
+            screen2.set_colorkey((255, 255, 255))
+            screen2.set_alpha(7)
+            screen.blit(screen2, (0, 0))
+            pygame.display.flip()
 
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            terminate()
-    screen.fill((0, 0, 0))
-    end_screen(fl_death)
-    pygame.display.flip()
+    end_screen_enemy = pygame.sprite.Group()
+    End_screen_enemies(pygame.image.load('data/end_screen_error.png').convert_alpha(), 2, 1, 0, 516)
+    End_screen_enemies(pygame.image.load('data/end_screen_error2.png').convert_alpha(), 2, 1, 0, 290)
+
+    while end_screen_running:
+        number = 1
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.KEYDOWN:
+                number = 0
+                end_screen_running = False
+                menu_running = True
+                volume = 0.1
+                fl_death = False
+                pygame.mixer.music.load('data/pacman_beginning.mp3')
+                pygame.mixer.music.play()
+                pygame.mixer.music.set_volume(volume)
+                pacmen_start_screen_sprites = pygame.sprite.Group()
+                player_group = pygame.sprite.Group()
+                start_screen_sprites = pygame.sprite.Group()
+                enemy_start_screen_sprites = pygame.sprite.Group()
+                left_enemy_group = pygame.sprite.Group()
+                PacmenStart()
+                start_screen()
+                Startmenuenemy(pygame.image.load('data/start_enemy.png').convert_alpha(), 4, 1, 0, 800)
+                menu_running = True
+                is_load_level = False
+                all_sprites = pygame.sprite.Group()
+                wall_group = pygame.sprite.Group()
+                point_group = pygame.sprite.Group()
+                pygame.mouse.set_visible(False)
+                end_screen_enemy = pygame.sprite.Group()
+                particles = pygame.sprite.Group()
+                settings_group = pygame.sprite.Group()
+                change_value = pygame.sprite.Group()
+                attemp = 0
+
+        screen.fill((0, 0, 0))
+        if number == 1:
+            end_screen(fl_death)
+        pygame.display.flip()
+
 pygame.quit()
