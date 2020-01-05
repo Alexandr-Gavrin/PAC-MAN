@@ -34,7 +34,7 @@ r, g, b = 0, 0, 0
 level = 'Лёгкий'
 arr_color = [r, g, b]
 
-volume = 1
+volume = 0.5
 pygame.mixer.music.load('data/pacman_beginning.mp3')
 pygame.mixer.music.play()
 pygame.mixer.music.set_volume(volume)
