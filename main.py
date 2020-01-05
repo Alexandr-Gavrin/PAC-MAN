@@ -111,7 +111,7 @@ def start_settings():
         push_enter, level, push_enter_level, settings_running
 
     if not change_coord_pacman_menu:
-        pacmen_start_screen_sprites.update(105, 295)
+        pacmen_start_screen_sprites.update(100, 295)
         change_coord_pacman_menu = True
     title = pygame.image.load('data/settings.png')
     screen.blit(title, (0, 0))
@@ -195,7 +195,7 @@ def start_settings():
             if cell == 0:
                 pacmen_start_screen_sprites.update(230, 205)
             elif cell == 1:
-                pacmen_start_screen_sprites.update(105, 295)
+                pacmen_start_screen_sprites.update(100, 295)
             else:
                 pacmen_start_screen_sprites.update(260, 385)
 
