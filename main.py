@@ -111,7 +111,7 @@ def start_settings():
         push_enter, level, push_enter_level, settings_running
 
     if not change_coord_pacman_menu:
-        pacmen_start_screen_sprites.update(110, 295)
+        pacmen_start_screen_sprites.update(105, 295)
         change_coord_pacman_menu = True
     title = pygame.image.load('data/settings.png')
     screen.blit(title, (0, 0))
@@ -140,6 +140,7 @@ def start_settings():
             if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
                 if cell == 2:
                     settings_running = False
+                    change_coord_pacman_menu = False
             if event.key == pygame.K_LEFT and cell == 0:
                 if float(volume) != 0.0:
                     volume_float = []
@@ -194,7 +195,7 @@ def start_settings():
             if cell == 0:
                 pacmen_start_screen_sprites.update(230, 205)
             elif cell == 1:
-                pacmen_start_screen_sprites.update(110, 295)
+                pacmen_start_screen_sprites.update(105, 295)
             else:
                 pacmen_start_screen_sprites.update(260, 385)
 
@@ -224,6 +225,7 @@ class Particle(pygame.sprite.Sprite):
     global stars
     fire = []
     for scale in (range(30)):
+
         fire.append(pygame.transform.scale(pygame.image.load(random.choice(stars)),
                                            (scale, scale)))
 
