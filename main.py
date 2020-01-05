@@ -32,9 +32,10 @@ change_coord_pacman_menu = False
 is_load_level = False
 r, g, b = 0, 0, 0
 level = 1
+level = 'Лёгкий'
 arr_color = [r, g, b]
 
-volume = 0.1
+volume = 0.5
 pygame.mixer.music.load('data/pacman_beginning.mp3')
 pygame.mixer.music.play()
 pygame.mixer.music.set_volume(volume)
@@ -105,7 +106,7 @@ def start_screen():
 def start_settings():
     global cell, running, change_coord_pacman_menu, volume, push_enter, level, push_enter_level
     if not change_coord_pacman_menu:
-        pacmen_start_screen_sprites.update(130, 295)
+        pacmen_start_screen_sprites.update(110, 295)
         change_coord_pacman_menu = True
     title = pygame.image.load('data/settings.png')
     screen.blit(title, (0, 0))
@@ -159,7 +160,7 @@ def start_settings():
                     volume = ''.join(volume_float)
                     volume = float(volume)
                 pygame.mixer.music.set_volume(float(volume))
-            elif event.key == pygame.K_RIGHT and cell == 0:
+            if event.key == pygame.K_RIGHT and cell == 0:
                 if float(volume) != 1.0:
                     volume_float = []
                     for i in str(float(volume)):
@@ -177,23 +178,28 @@ def start_settings():
                     volume = ''.join(volume_float)
                     volume = float(volume)
                 pygame.mixer.music.set_volume(float(volume))
-            elif event.key == pygame.K_RIGHT and cell == 1:
-                if level != 2:
-                    level += 1
-            elif event.key == pygame.K_LEFT and cell == 1:
-                if level != 1:
-                    level -= 1
-            elif event.key == pygame.K_DOWN:
+            if event.key == pygame.K_RIGHT and cell == 1:
+                if level != 'Сложный':
+                    level = 'Сложный'
+                else:
+                    level = 'Лёгкий'
+            if event.key == pygame.K_LEFT and cell == 1:
+                if level != 'Лёгкий':
+                    level = 'Лёгкий'
+                else:
+                    level = 'Сложный'
+            if event.key == pygame.K_DOWN:
                 cell = (cell + 1) % 3
-            elif event.key == pygame.K_UP:
+            if event.key == pygame.K_UP:
                 cell = (cell - 1) % 3
 
             if cell == 0:
                 pacmen_start_screen_sprites.update(230, 205)
             elif cell == 1:
-                pacmen_start_screen_sprites.update(130, 295)
+                pacmen_start_screen_sprites.update(110, 295)
             else:
                 pacmen_start_screen_sprites.update(260, 385)
+
 
 
 def end_screen(fl):
