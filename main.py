@@ -45,13 +45,16 @@ pygame.mixer.music.play()
 pygame.mixer.music.set_volume(volume)
 
 
+# функция выхода
 def terminate():
     pygame.quit()
     sys.exit()
 
 
+# начальный экран
 def start_screen():
     global cell, menu_running, level, is_load_level, game_running, settings_running
+    # текст
     title = pygame.image.load('data/title.png')
     screen.blit(title, (200, 0))
     start_screen_text = ["Начать", "",
@@ -77,8 +80,10 @@ def start_screen():
             terminate()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
+                # выход
                 if cell == 2:
                     terminate()
+                # запуск настроек
                 if cell == 1:
                     settings_running = True
                     while settings_running:
@@ -88,6 +93,7 @@ def start_screen():
                         enemy_start_screen_sprites.draw(screen)
                         enemy_start_screen_sprites.update()
                         pygame.display.flip()
+                # начать
                 if cell == 0:
                     if not is_load_level:
                         generate_level(load_level('level.txt'))
@@ -201,14 +207,18 @@ def start_settings():
                 pacmen_start_screen_sprites.update(260, 385)
 
 
+# конечный экран
 def end_screen(fl):
     global win_music
+    # проверка на поражение или победу
     if fl:
+        # проигрыш
         game_over_image = pygame.image.load('data/game_over.png')  # Музыка при проигрыше
         screen.blit(game_over_image, (225, 325))
         end_screen_enemy.draw(screen)
         end_screen_enemy.update()
     else:
+        # победа
         if not win_music:
             # Музыка при выигрыши
             music_win = random.choice(['data/sound_win.mp3', 'data/sound_win_2.mp3'])
@@ -223,6 +233,7 @@ def end_screen(fl):
         particles.update()
 
 
+# Частицы
 class Particle(pygame.sprite.Sprite):
     global stars
     fire = []
@@ -247,12 +258,14 @@ class Particle(pygame.sprite.Sprite):
             self.kill()
 
 
+# создание частиц
 def create_particles(position, count):
     numbers = range(-5, 6)
     for i in range(count):
         Particle(position, random.choice(numbers), random.choice(numbers))
 
 
+# враги на последнем экране
 class End_screen_enemies(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__(end_screen_enemy)
@@ -278,6 +291,7 @@ class End_screen_enemies(pygame.sprite.Sprite):
         time.sleep(0.03)
 
 
+# курсор
 class PacmenStart(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(pacmen_start_screen_sprites, start_screen_sprites)
@@ -291,6 +305,7 @@ class PacmenStart(pygame.sprite.Sprite):
         self.rect.x = x
 
 
+# враг на начальном экране
 class Startmenuenemy(pygame.sprite.Sprite):
 
     def __init__(self, sheet, columns, rows, x, y):
@@ -317,6 +332,7 @@ class Startmenuenemy(pygame.sprite.Sprite):
         time.sleep(0.03)
 
 
+# счетчик
 def score_counter():
     global score_count
     screen.fill((0, 0, 0))
@@ -331,8 +347,10 @@ def score_counter():
                                                text_w + 20, text_h + 20), 1)
 
 
+# Класс пакмен
 class Player(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y, speed_x=6, speed_y=0):
+        # разворот спрайта пакмена
         for player in all_sprites:
             try:
                 if player.can_kill == True:
@@ -364,15 +382,17 @@ class Player(pygame.sprite.Sprite):
         global coord_x, coord_y, score_count
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
+        # проверка на выхождение за карту
         if self.rect.x < 0:
             self.rect.x = 830
         if self.rect.x > 830:
             self.rect.x = 0
         if self.rect.y < 0:
-            self.rect.y = 940
-        if self.rect.y > 940:
+            self.rect.y = 901
+        if self.rect.y > 901:
             self.rect.y = 0
         if x == 0 and y == 0:
+            # движение
             self.rect.x += self.speed_x
             if pygame.sprite.spritecollideany(self, wall_group):
                 if fl_HESOYAM is False:
@@ -407,6 +427,7 @@ class Player(pygame.sprite.Sprite):
                 self.prev_speed_x = self.speed_x
                 self.prev_speed_y = self.speed_y
                 return
+        # сбор монет
         if pygame.sprite.spritecollide(self, point_group, True):
             score_count += 10
         coord_x = self.rect.x
