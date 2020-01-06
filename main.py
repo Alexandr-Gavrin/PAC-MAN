@@ -469,9 +469,9 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.rect.move(x * title_width, y * title_width)
         self.speed_x = 6
         self.speed_y = 0
-        # Выбор скорости врага
         self.speed_enemy = 6
-        if level == 2:
+        # Выбор скорости врага
+        if level == "Сложный":
             self.speed_enemy = 10
         self.way_enemy = None
         self.start_enemy_motion = True
@@ -731,8 +731,10 @@ while main_running:
             pygame.display.flip()
 
     end_screen_enemy = pygame.sprite.Group()
-    End_screen_enemies(pygame.image.load('data/end_screen_error.png').convert_alpha(), 2, 1, 0, 516)
-    End_screen_enemies(pygame.image.load('data/end_screen_error2.png').convert_alpha(), 2, 1, 0,
+    End_screen_enemies(pygame.image.load('data/end_screen_error.png').convert_alpha(),
+                       2, 1, 0, 516)
+    End_screen_enemies(pygame.image.load('data/end_screen_error2.png').convert_alpha(),
+                       2, 1, 0,
                        290)
 
     while end_screen_running:
