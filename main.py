@@ -20,6 +20,7 @@ fl_GOD = False
 title_width = 30
 gravity = 0.5
 settings_running = False
+generating_level = 0
 title_height = 30
 score_count = 0
 cell = 0
@@ -485,7 +486,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
 
     def update(self):
-        global attemp, fl_death
+        global attemp, fl_death, score_count, generating_level
         if self.start_enemy_motion and self.rect.x == 402:
             self.x_coord = self.rect.x
             self.y_coord = self.rect.y
@@ -510,10 +511,11 @@ class Enemy(pygame.sprite.Sprite):
             Wall(13, 13)
             Wall(14, 13)
             wall_group.draw(screen)
-
             if attemp < 20:
                 self.way_enemy = random.choice(['up', 'left', 'right'])
                 attemp += 1
+            else:
+                generating_level = 1
             # Если пакман движется вниз то выполнится это условие
             if self.way_enemy == 'down':
                 self.x_coord = self.rect.x
@@ -579,6 +581,7 @@ class Enemy(pygame.sprite.Sprite):
                 pygame.mixer.music.set_volume(volume)
                 fl_death = True
             else:
+                score_count += 100
                 self.kill()
 
 
@@ -702,17 +705,20 @@ while main_running:
         if not pause:
             random_number = random.randrange(0, 3)
             if random_number == 0:
-                r += random.randrange(0, 30)
+                r += random.randrange(0, 10)
             elif random_number == 1:
-                g += random.randrange(0, 30)
+                g += random.randrange(0, 10)
             else:
-                b += random.randrange(0, 30)
+                b += random.randrange(0, 10)
             wall_group = pygame.sprite.Group()
             if r > 255 or b > 255 or g > 255:
-                r, g, b = (random.randrange(0, 60), random.randrange(0, 60),
-                           random.randrange(0, 60))
+                r, g, b = (random.randrange(20, 50), random.randrange(20, 50),
+                           random.randrange(20, 50))
             screen.fill((0, 0, 0))
-            generate_level(load_level('rainbow_level.txt'))
+            if generating_level == 0:
+                generate_level(load_level('rainbow_level.txt'))
+            else:
+                generate_level(load_level('rainbow_level_2.txt'))
             score_counter()
             all_sprites.draw(screen)
             wall_group.draw(screen)
@@ -760,12 +766,16 @@ while main_running:
                 start_screen()
                 Startmenuenemy(pygame.image.load('data/start_enemy.png').convert_alpha(), 4, 1, 0,
                                800)
+                generating_level = 0
                 menu_running = True
                 is_load_level = False
                 all_sprites = pygame.sprite.Group()
                 wall_group = pygame.sprite.Group()
                 point_group = pygame.sprite.Group()
                 pygame.mouse.set_visible(False)
+                fl_HESOYAM = False
+                fl_GOD = False
+                score_count = 0
                 end_screen_enemy = pygame.sprite.Group()
                 particles = pygame.sprite.Group()
                 settings_group = pygame.sprite.Group()
