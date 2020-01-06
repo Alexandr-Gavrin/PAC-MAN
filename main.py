@@ -747,7 +747,7 @@ while main_running:
             player_group.update()
             left_enemy_group.update()
             pygame.display.flip()
-            if fl_death is True or len(point_group) == 0:
+            if fl_death is True or len(point_group) == 0 or len(left_enemy_group) == 0:
                 game_running = False
                 end_screen_running = True
         else:
