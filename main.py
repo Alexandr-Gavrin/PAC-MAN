@@ -1,3 +1,4 @@
+# подключение библиотек
 import pygame
 import time
 import random
@@ -5,44 +6,90 @@ import sys
 
 pygame.init()
 width, height = 841, 901
-screen = pygame.display.set_mode((width, height), )
-all_sprites = pygame.sprite.Group()
-wall_group = pygame.sprite.Group()
-point_group = pygame.sprite.Group()
-pygame.mouse.set_visible(False)
-end_screen_enemy = pygame.sprite.Group()
-particles = pygame.sprite.Group()
-settings_group = pygame.sprite.Group()
-change_value = pygame.sprite.Group()
-running = True
-fl_HESOYAM = False
-fl_GOD = False
+screen = pygame.display.set_mode((width, height))
+all_sprites = pygame.sprite.Group()  # группа всех спрайтов
+wall_group = pygame.sprite.Group()  # группа спрайтов стен
+point_group = pygame.sprite.Group()  # группа спрайтов очков
+pygame.mouse.set_visible(False)  # Отключение видимости мыши
+end_screen_enemy = pygame.sprite.Group()  # группа спрайтов врагов на конечном экране
+particles = pygame.sprite.Group()  # группа спрайтов звезд на конечном экране
+settings_group = pygame.sprite.Group()  # группа спрайтов на настройках
+change_value = pygame.sprite.Group()  # группа спрайтов изменяемых элементов
+fl_HESOYAM = False  # пасхалка
+fl_GOD = False  # пасхалка
 title_width = 30
-gravity = 0.5
-settings_running = False
-generating_level = 0
+gravity = 0.5  # переменная для изменения скорости звезд на выигрышном экране
+settings_running = False  # переменная для начала настроек
+generating_level = 0  # переменная закрытия некоторых блоков
 title_height = 30
-score_count = 0
-cell = 0
+score_count = 0  # переменная для кол-ва очков
+cell = 0  # выбранная ячейка в меню
 coord_x = 0
+attemp = 0  # кол-во попыток для врагов чтобы развернуться
 coord_y = 0
-fl_death = False
-win_music = False
+fl_death = False  # переменная отвечающая за смерть и выгрыш героя
+win_music = False  # переменная отвечающая за проигрыш музыки победы
 screen_rect = (0, 0, width, height)
 prev_pac_man = 'right'
-stars = ['data/star.png', 'data/green_star.png', 'data/Communist_star.png', 'data/red_star.png']
-rotate_pacman = False
-change_coord_pacman_menu = False
+stars = ['data/star.png', 'data/green_star.png',
+         'data/Communist_star.png', 'data/red_star.png']  # список изображений звёзд
+rotate_pacman = False  # переменная отвечающая за поворот пакмена
+change_coord_pacman_menu = False  # переменная отвечающая за изменения координат пакмена в меню
 is_load_level = False
-r, g, b = 0, 0, 0
-level = 1
-level = 'Лёгкий'
-arr_color = [r, g, b]
-
-volume = 0.5
+level = 'Лёгкий'  # уровень сложности
+volume = 0.5  # громкость музыки
 pygame.mixer.music.load('data/pacman_beginning.mp3')
 pygame.mixer.music.play()
 pygame.mixer.music.set_volume(volume)
+r, g, b = (random.randrange(0, 255), random.randrange(0, 255),
+           random.randrange(0, 255))  # цвет
+arr_color = [r, g, b]  # список цветов
+pacmen_start_screen_sprites = pygame.sprite.Group()  # группа спрайтов начального героя
+player_group = pygame.sprite.Group()  # группа спрайтов для пакмена в игре
+start_screen_sprites = pygame.sprite.Group()  # группа начальных партиклов
+enemy_start_screen_sprites = pygame.sprite.Group()  # группа спрайтов начального врага
+left_enemy_group = pygame.sprite.Group()  # группа спрайтов врагов
+
+main_running = True
+menu_running = True
+settings_running = True
+pause = False
+game_running = True
+
+
+def start_settings():  # Функция для установки начальных настроек
+    number = 0
+    end_screen_running = False
+    menu_running = True
+    volume = 0.1
+    fl_death = False
+    pygame.mixer.music.load('data/pacman_beginning.mp3')
+    pygame.mixer.music.play()
+    pygame.mixer.music.set_volume(volume)
+    pacmen_start_screen_sprites = pygame.sprite.Group()
+    player_group = pygame.sprite.Group()
+    start_screen_sprites = pygame.sprite.Group()
+    enemy_start_screen_sprites = pygame.sprite.Group()
+    left_enemy_group = pygame.sprite.Group()
+    PacmenStart()
+    start_screen()
+    Startmenuenemy(pygame.image.load('data/start_enemy.png').convert_alpha(), 4, 1, 0,
+                   800)
+    generating_level = 0
+    menu_running = True
+    is_load_level = False
+    all_sprites = pygame.sprite.Group()
+    wall_group = pygame.sprite.Group()
+    point_group = pygame.sprite.Group()
+    pygame.mouse.set_visible(False)
+    fl_HESOYAM = False
+    fl_GOD = False
+    score_count = 0
+    end_screen_enemy = pygame.sprite.Group()
+    particles = pygame.sprite.Group()
+    settings_group = pygame.sprite.Group()
+    change_value = pygame.sprite.Group()
+    attemp = 0
 
 
 # функция выхода
@@ -51,7 +98,7 @@ def terminate():
     sys.exit()
 
 
-# начальный экран
+# функция начальный экран
 def start_screen():
     global cell, menu_running, level, is_load_level, game_running, settings_running
     # текст
@@ -64,7 +111,7 @@ def start_screen():
     font = pygame.font.Font(None, 50)
     text_coord = 200
     random_num = random.randrange(0, 3)
-    arr_color[random_num] = (arr_color[random_num] + 9) % 255
+    arr_color[random_num] = (arr_color[random_num] + 9) % 255  # Изменение цвета текста
 
     for string in start_screen_text:
         line_rendered = font.render(string, 1, (arr_color[0], arr_color[1], arr_color[2]))
@@ -78,6 +125,7 @@ def start_screen():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             terminate()
+            # выход
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
                 # выход
@@ -96,15 +144,18 @@ def start_screen():
                 # начать
                 if cell == 0:
                     if not is_load_level:
-                        generate_level(load_level('level.txt'))
+                        generate_level(load_level('level.txt'))  # Генерация уровня
                         is_load_level = True
-                    game_running = True
-                    menu_running = False
+                    game_running = True  # запуск игрового цикла
+                    menu_running = False  # прекращение цикла меню
             if event.key == pygame.K_DOWN:
+                # пакмен вниз
                 cell = (cell + 1) % 3
             if event.key == pygame.K_UP:
+                # пакмен вверх
                 cell = (cell - 1) % 3
 
+            # изменение положения пакмена
             if cell == 0:
                 pacmen_start_screen_sprites.update(295, 205)
             elif cell == 1:
@@ -115,22 +166,24 @@ def start_screen():
 
 # Настройки
 def start_settings():
-    global cell, running, change_coord_pacman_menu, volume, \
-        push_enter, level, push_enter_level, settings_running
+    global cell, running, change_coord_pacman_menu, \
+        volume, push_enter, level, push_enter_level, \
+        settings_running  # использование глобальных переменных
 
-    if not change_coord_pacman_menu:
+    if not change_coord_pacman_menu:  # установка начального положения пакмена в меню настроек
         pacmen_start_screen_sprites.update(100, 295)
         change_coord_pacman_menu = True
+
     title = pygame.image.load('data/settings.png')
     screen.blit(title, (0, 0))
-    start_screen_text = ["Громкость    " + str(volume), "",
+    start_screen_text = ["Громкость    " + str(volume), "",  # текст
                          "Уровень сложности   " + str(level), "",
                          "Выход"]
 
     font = pygame.font.Font(None, 50)
     text_coord = 200
     random_num = random.randrange(0, 3)
-    arr_color[random_num] = (arr_color[random_num] + 9) % 255
+    arr_color[random_num] = (arr_color[random_num] + 9) % 255  # изменение цвета текста
 
     for string in start_screen_text:
         line_rendered = font.render(string, 1, (arr_color[0], arr_color[1], arr_color[2]))
@@ -144,44 +197,45 @@ def start_settings():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             terminate()
+            # выход
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
                 if cell == 2:
-                    settings_running = False
-                    change_coord_pacman_menu = False
+                    settings_running = False  # прекращение цикла настроек
+                    change_coord_pacman_menu = False  # установка курсора в начальное положение
             if event.key == pygame.K_LEFT and cell == 0:
-                if float(volume) != 0.0:
+                if float(volume) != 0.0:  # Изменение громкости музыки
                     volume_float = []
-                    for i in str(float(volume)):
+                    for number in str(float(volume)):
                         try:
-                            volume_float.append(int(i))
+                            volume_float.append(int(number))
                         except ValueError:
-                            volume_float.append(i)
+                            volume_float.append(number)
                     if volume_float[0] == 1:
                         volume_float[0] -= 1
                         volume_float[2] += 9
                     else:
                         volume_float[2] -= 1
-                    for i in range(len(volume_float)):
-                        volume_float[i] = str(volume_float[i])
+                    for number in range(len(volume_float)):
+                        volume_float[number] = str(volume_float[number])
                     volume = ''.join(volume_float)
                     volume = float(volume)
                 pygame.mixer.music.set_volume(float(volume))
             if event.key == pygame.K_RIGHT and cell == 0:  # Изменение громкости музыки
                 if float(volume) != 1.0:
                     volume_float = []
-                    for i in str(float(volume)):
+                    for number in str(float(volume)):
                         try:
-                            volume_float.append(int(i))
+                            volume_float.append(int(number))
                         except ValueError:
-                            volume_float.append(i)
+                            volume_float.append(number)
                     if volume_float[2] == 9:
                         volume_float[0] += 1
                         volume_float[2] -= 9
                     else:
                         volume_float[2] += 1
-                    for i in range(len(volume_float)):
-                        volume_float[i] = str(volume_float[i])
+                    for number in range(len(volume_float)):
+                        volume_float[i] = str(volume_float[number])
                     volume = ''.join(volume_float)
                     volume = float(volume)
                 pygame.mixer.music.set_volume(float(volume))
@@ -195,7 +249,7 @@ def start_settings():
                     level = 'Лёгкий'
                 else:
                     level = 'Сложный'
-            if event.key == pygame.K_DOWN:
+            if event.key == pygame.K_DOWN:  # Изменение положения курсора
                 cell = (cell + 1) % 3
             if event.key == pygame.K_UP:
                 cell = (cell - 1) % 3
@@ -226,9 +280,9 @@ def end_screen(fl):
             pygame.mixer.music.play()
             pygame.mixer.music.set_volume(volume)
             win_music = True
-        win_image = pygame.image.load('data/win.png')
+        win_image = pygame.image.load('data/win.png')  # загрузка выигрышной картинки
         screen.blit(win_image, (275, 325))
-        create_particles((random.randint(0, 800), 0), random.randint(0, 5))
+        create_particles((random.randint(0, 800), 0), random.randint(0, 5))  # создание звезд
         particles.draw(screen)
         particles.update()
 
@@ -236,10 +290,10 @@ def end_screen(fl):
 # Частицы
 class Particle(pygame.sprite.Sprite):
     global stars
-    fire = []
+    fire = []  # список всех звезд
     for scale in (range(30)):
         fire.append(pygame.transform.scale(pygame.image.load(random.choice(stars)),
-                                           (scale, scale)))
+                                           (scale, scale)))  # добавление в список звезду
 
     def __init__(self, pos, dx, dy):
         super().__init__(particles)
@@ -251,17 +305,18 @@ class Particle(pygame.sprite.Sprite):
         self.gravity = gravity
 
     def update(self):
+        # изменение положения звезд
         self.velocity[1] += self.gravity
         self.rect.x += self.velocity[0]
         self.rect.y += self.velocity[1]
         if not self.rect.colliderect(screen_rect):
-            self.kill()
+            self.kill()  # удаление звезды при выходе за экран
 
 
 # создание частиц
 def create_particles(position, count):
-    numbers = range(-5, 6)
-    for i in range(count):
+    numbers = range(-5, 6)  # список скоростей звезд
+    for number in range(count):
         Particle(position, random.choice(numbers), random.choice(numbers))
 
 
@@ -285,6 +340,7 @@ class End_screen_enemies(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def update(self):
+        # изменение положения
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
         self.rect.x = (self.rect.x + 5) % width
@@ -297,17 +353,16 @@ class PacmenStart(pygame.sprite.Sprite):
         super().__init__(pacmen_start_screen_sprites, start_screen_sprites)
         self.image = pygame.image.load('data/start_pacman2.0.png')
         self.rect = self.image.get_rect()
-        self.rect.x = 295
-        self.rect.y = 205
+        self.rect.x = 295  # начальное положение
+        self.rect.y = 205  # начальное положение
 
-    def update(self, x, y):
+    def update(self, x, y):  # измениние положения
         self.rect.y = y
         self.rect.x = x
 
 
 # враг на начальном экране
 class Startmenuenemy(pygame.sprite.Sprite):
-
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__(enemy_start_screen_sprites, start_screen_sprites)
         self.frames = []
@@ -325,7 +380,7 @@ class Startmenuenemy(pygame.sprite.Sprite):
                 self.frames.append(sheet.subsurface(pygame.Rect(
                     frame_location, self.rect.size)))
 
-    def update(self):
+    def update(self):  # измениние положения
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
         self.rect.x = (self.rect.x + 5) % width
@@ -338,8 +393,8 @@ def score_counter():
     screen.fill((0, 0, 0))
     font = pygame.font.Font(None, 25)
     text = font.render(str(score_count), 0, (255, 255, 255))
-    text_x = 750
-    text_y = 330
+    text_x = 750  # положение
+    text_y = 330  # положение
     text_w = text.get_width()
     text_h = text.get_height()
     screen.blit(text, (text_x, text_y))
@@ -353,13 +408,13 @@ class Player(pygame.sprite.Sprite):
         # разворот спрайта пакмена
         for player in all_sprites:
             try:
-                if player.can_kill == True:
-                    all_sprites.remove(player)
-            except:
+                if player.can_kill:  # Если в группе всех спрайтов это пакмен
+                    all_sprites.remove(player)  # удаляем
+            except AttributeError:
                 pass
         super().__init__(all_sprites, player_group)
         self.frames = []
-        self.can_kill = True
+        self.can_kill = True  # переменная позволяющая удалять пакмена для его разворота
         self.cut_sheet(sheet, columns, rows)
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
@@ -377,7 +432,7 @@ class Player(pygame.sprite.Sprite):
                 frame_location = (self.rect.w * i, self.rect.h * j)
                 self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
 
-    def update(self, x=0, y=0, direction=0):
+    def update(self, x=0, y=0, direction=0):  # движение пакмена
         global wall_group
         global coord_x, coord_y, score_count
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
@@ -395,14 +450,14 @@ class Player(pygame.sprite.Sprite):
             # движение
             self.rect.x += self.speed_x
             if pygame.sprite.spritecollideany(self, wall_group):
-                if fl_HESOYAM is False:
+                if fl_HESOYAM is False:  # пасхалка
                     self.rect.x -= self.speed_x
                     self.cur_frame = 2
                 if rotate_pacman:
                     self.cur_frame = 1
             self.rect.y += self.speed_y
             if pygame.sprite.spritecollideany(self, wall_group):
-                if fl_HESOYAM is False:
+                if fl_HESOYAM is False:  # пасхалка
                     self.rect.y -= self.speed_y
                     self.cur_frame = 2
                 if rotate_pacman:
@@ -444,7 +499,7 @@ class Player(pygame.sprite.Sprite):
                 self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
         self.rect = self.rect.move(x, y)
 
-    def wall(self, x, y):
+    def wall(self, x, y):  # функция для проверки столкновения пакмена со стенами при поворотах
         self.rect.x += x
         self.rect.y += y
         if pygame.sprite.spritecollideany(self, wall_group):
@@ -456,7 +511,7 @@ class Player(pygame.sprite.Sprite):
         return False
 
 
-class Wall(pygame.sprite.Sprite):
+class Wall(pygame.sprite.Sprite):  # класс стен
     def __init__(self, x, y, color=(0, 0, 0)):
         super().__init__(wall_group)
         self.image = pygame.Surface((title_width - 6, title_height - 6))
@@ -466,16 +521,13 @@ class Wall(pygame.sprite.Sprite):
                                                title_height * y)
 
 
-class Point(pygame.sprite.Sprite):
+class Point(pygame.sprite.Sprite):  # класс очков
     def __init__(self, x, y):
         super().__init__(all_sprites, point_group)
         self.image = pygame.Surface((title_width - 10, title_height - 10))
         pygame.draw.circle(self.image, (255, 255, 173), (15, 15), 5, 0)
         self.rect = self.image.get_rect().move(title_width * x - 3,
                                                title_height * y)
-
-
-attemp = 0
 
 
 # Класс который создаёт и управляет врагами
@@ -496,7 +548,7 @@ class Enemy(pygame.sprite.Sprite):
         if level == "Сложный":
             self.speed_enemy = 10
         self.way_enemy = None
-        self.start_enemy_motion = True
+        self.start_enemy_motion = True  # переменная для начального хождения врагов
         self.mask = pygame.mask.from_surface(self.image)
 
     def cut_sheet(self, sheet, columns, rows):
@@ -506,7 +558,7 @@ class Enemy(pygame.sprite.Sprite):
                 frame_location = (self.rect.w * i, self.rect.h * j)
                 self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
 
-    def update(self):
+    def update(self):  # движение врагов по карте
         global attemp, fl_death, score_count, generating_level
         if self.start_enemy_motion and self.rect.x == 402:
             self.x_coord = self.rect.x
@@ -520,18 +572,12 @@ class Enemy(pygame.sprite.Sprite):
             self.rect.y -= 6
             if pygame.sprite.spritecollideany(self, wall_group):
                 self.start_enemy_motion = False
-                Wall(13, 13)
-                Wall(14, 13)
-                wall_group.draw(screen)
         elif self.start_enemy_motion and not pygame.sprite.spritecollideany(self, wall_group):
             if self.rect.x > 402:
                 self.rect.x -= 6
             else:
                 self.rect.x += 6
         elif not self.start_enemy_motion:
-            Wall(13, 13)
-            Wall(14, 13)
-            wall_group.draw(screen)
             if attemp < 20:
                 self.way_enemy = random.choice(['up', 'left', 'right'])
                 attemp += 1
@@ -595,7 +641,7 @@ class Enemy(pygame.sprite.Sprite):
                     self.way_enemy = random.choice(['down', 'up', 'left', 'right'])
 
         if pygame.sprite.spritecollideany(self, player_group):
-            if fl_GOD is False:
+            if fl_GOD is False:  # пасхалка
                 global volume
                 pygame.mixer.music.load('data/game_over.mp3')
                 pygame.mixer.music.play()
@@ -606,18 +652,14 @@ class Enemy(pygame.sprite.Sprite):
                 self.kill()
 
 
-def load_level(filename):
+def load_level(filename):  # загрузка уровня
     filename = 'data/' + filename
     with open(filename, 'r') as mapFile:
         level_map = [line for line in mapFile]
     return level_map
 
 
-r, g, b = (random.randrange(0, 255), random.randrange(0, 255),
-           random.randrange(0, 255))
-
-
-def generate_level(level):
+def generate_level(level):  # генерация уровня в игре
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '.':
@@ -644,24 +686,13 @@ def generate_level(level):
                       2, 1, x, y)
 
 
-pacmen_start_screen_sprites = pygame.sprite.Group()
-player_group = pygame.sprite.Group()
-start_screen_sprites = pygame.sprite.Group()
-enemy_start_screen_sprites = pygame.sprite.Group()
-left_enemy_group = pygame.sprite.Group()
+PacmenStart()  # запуск фунции для курсора в меню
+start_screen()  # запуск фунции для меню
+Startmenuenemy(pygame.image.load('data/start_enemy.png').convert_alpha(),
+               4, 1, 0, 800)  # запуск фунции для врага на начальном экране
 
-PacmenStart()
-start_screen()
-Startmenuenemy(pygame.image.load('data/start_enemy.png').convert_alpha(), 4, 1, 0, 800)
-
-main_running = True
-menu_running = True
-settings_running = True
-pause = False
-game_running = True
-
-while main_running:
-    while menu_running:
+while main_running:  # цикл всего приложеня
+    while menu_running:  # цикл меню
         screen.fill((0, 0, 0))
         start_screen()
         pacmen_start_screen_sprites.draw(screen)
@@ -669,17 +700,17 @@ while main_running:
         enemy_start_screen_sprites.update()
         pygame.display.flip()
 
-    while game_running:
+    while game_running:  # цикл игры
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            if not pause:
+            if not pause:  # проверка на паузу
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_g:
                         fl_GOD = not fl_GOD
                     if event.key == pygame.K_h:
                         fl_HESOYAM = not fl_HESOYAM
-                    if event.key == pygame.K_RIGHT:
+                    if event.key == pygame.K_RIGHT:  # движение пакмена
                         for i in player_group:
                             if fl_HESOYAM or not i.wall(15, 0) and prev_pac_man != 'right':
                                 player_group = pygame.sprite.Group()
@@ -688,7 +719,7 @@ while main_running:
                                        coord_x / title_width, coord_y / title_height, 6, 0)
                                 prev_pac_man = 'right'
                                 rotate_pacman = False
-                    if event.key == pygame.K_DOWN:
+                    if event.key == pygame.K_DOWN:  # движение пакмена
                         for i in player_group:
                             if fl_HESOYAM or not i.wall(0, 15) and prev_pac_man != 'down':
                                 player_group = pygame.sprite.Group()
@@ -697,7 +728,7 @@ while main_running:
                                        coord_x / title_width, coord_y / title_height, 0, 6)
                                 prev_pac_man = 'down'
                                 rotate_pacman = False
-                    if event.key == pygame.K_LEFT:
+                    if event.key == pygame.K_LEFT:  # движение пакмена
                         for i in player_group:
                             if fl_HESOYAM or not i.wall(-15, 0) and prev_pac_man != 'left':
                                 player_group = pygame.sprite.Group()
@@ -706,7 +737,7 @@ while main_running:
                                        coord_x / title_width, coord_y / title_height, -6, 0)
                                 prev_pac_man = 'left'
                                 rotate_pacman = True
-                    if event.key == pygame.K_UP:
+                    if event.key == pygame.K_UP:  # движение пакмена
                         for i in player_group:
                             if fl_HESOYAM or not i.wall(0, -15) and prev_pac_man != 'up':
                                 player_group = pygame.sprite.Group()
@@ -715,15 +746,15 @@ while main_running:
                                        coord_x / title_width, coord_y / title_height, 0, -6)
                                 prev_pac_man = 'up'
                                 rotate_pacman = True
-                    if event.key == pygame.K_ESCAPE:
+                    if event.key == pygame.K_ESCAPE:  # пауза
                         pause = True
                         pygame.mixer.music.pause()
             else:
-                if event.type == pygame.KEYDOWN:
+                if event.type == pygame.KEYDOWN:  # снятие паузы
                     if event.key == pygame.K_ESCAPE:
                         pygame.mixer.music.unpause()
                         pause = False
-        if not pause:
+        if not pause:  # изменение поля если нет паузы
             random_number = random.randrange(0, 3)
             if random_number == 0:
                 r += random.randrange(0, 10)
@@ -736,76 +767,48 @@ while main_running:
                 r, g, b = (random.randrange(20, 50), random.randrange(20, 50),
                            random.randrange(20, 50))
             screen.fill((0, 0, 0))
-            if generating_level == 0:
+            if generating_level == 0:  # закрытие блоков после выхода врагов из спавна
                 generate_level(load_level('rainbow_level.txt'))
             else:
                 generate_level(load_level('rainbow_level_2.txt'))
-            score_counter()
+            score_counter()  # запуск счетчика
             all_sprites.draw(screen)
             wall_group.draw(screen)
-            time.sleep(0.06)
+            time.sleep(0.06)  # задержка
             player_group.update()
             left_enemy_group.update()
             pygame.display.flip()
-            if fl_death is True or len(point_group) == 0 or len(left_enemy_group) == 0:
-                game_running = False
-                end_screen_running = True
-        else:
+            if fl_death is True or len(point_group) == 0 or \
+                    len(left_enemy_group) == 0:  # выигрыш или проигрыш
+                game_running = False  # остановка игрового цикла
+                end_screen_running = True  # запуск цикла конечного экрана
+        else:  # затухание экрана
             screen2 = pygame.Surface((width, height))
             screen2.set_colorkey((255, 255, 255))
             screen2.set_alpha(7)
             screen.blit(screen2, (0, 0))
             pygame.display.flip()
+            time.sleep(0.03)
 
-    end_screen_enemy = pygame.sprite.Group()
+    end_screen_enemy = pygame.sprite.Group()  # враги на конечном экране
     End_screen_enemies(pygame.image.load('data/end_screen_error.png').convert_alpha(),
                        2, 1, 0, 516)
     End_screen_enemies(pygame.image.load('data/end_screen_error2.png').convert_alpha(),
-                       2, 1, 0,
-                       290)
+                       2, 1, 0, 290)
 
-    while end_screen_running:
-        number = 1
+    while end_screen_running:  # цикл конечного экрана
+        number = 1  # переменная для того чтобы после выигрыша не запускалася проигрыш
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
+                # выход
             if event.type == pygame.KEYDOWN:
-                number = 0
-                end_screen_running = False
-                menu_running = True
-                volume = 0.1
-                fl_death = False
-                pygame.mixer.music.load('data/pacman_beginning.mp3')
-                pygame.mixer.music.play()
-                pygame.mixer.music.set_volume(volume)
-                pacmen_start_screen_sprites = pygame.sprite.Group()
-                player_group = pygame.sprite.Group()
-                start_screen_sprites = pygame.sprite.Group()
-                enemy_start_screen_sprites = pygame.sprite.Group()
-                left_enemy_group = pygame.sprite.Group()
-                PacmenStart()
-                start_screen()
-                Startmenuenemy(pygame.image.load('data/start_enemy.png').convert_alpha(), 4, 1, 0,
-                               800)
-                generating_level = 0
-                menu_running = True
-                is_load_level = False
-                all_sprites = pygame.sprite.Group()
-                wall_group = pygame.sprite.Group()
-                point_group = pygame.sprite.Group()
-                pygame.mouse.set_visible(False)
-                fl_HESOYAM = False
-                fl_GOD = False
-                score_count = 0
-                end_screen_enemy = pygame.sprite.Group()
-                particles = pygame.sprite.Group()
-                settings_group = pygame.sprite.Group()
-                change_value = pygame.sprite.Group()
-                attemp = 0
-
+                start_settings()  # установка начальных настроек
+                # запуск меню
         screen.fill((0, 0, 0))
-        if number == 1:
-            end_screen(fl_death)
+        if number == 1:  # запуск экрана проигрыша или выгрыша
+            end_screen(fl_death)  # функция проигрыша и выигрыша
         pygame.display.flip()
 
-pygame.quit()
+pygame.quit()  # выход из игры
+# конец!
