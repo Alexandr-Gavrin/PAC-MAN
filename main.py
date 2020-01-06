@@ -106,6 +106,7 @@ def start_screen():
                 pacmen_start_screen_sprites.update(295, 385)
 
 
+# Настройки
 def start_settings():
     global cell, running, change_coord_pacman_menu, volume, \
         push_enter, level, push_enter_level, settings_running
@@ -159,7 +160,7 @@ def start_settings():
                     volume = ''.join(volume_float)
                     volume = float(volume)
                 pygame.mixer.music.set_volume(float(volume))
-            if event.key == pygame.K_RIGHT and cell == 0:
+            if event.key == pygame.K_RIGHT and cell == 0:  # Изменение громкости музыки
                 if float(volume) != 1.0:
                     volume_float = []
                     for i in str(float(volume)):
@@ -177,7 +178,7 @@ def start_settings():
                     volume = ''.join(volume_float)
                     volume = float(volume)
                 pygame.mixer.music.set_volume(float(volume))
-            if event.key == pygame.K_RIGHT and cell == 1:
+            if event.key == pygame.K_RIGHT and cell == 1:  # Изменение уровня сложности
                 if level != 'Сложный':
                     level = 'Сложный'
                 else:
@@ -191,7 +192,6 @@ def start_settings():
                 cell = (cell + 1) % 3
             if event.key == pygame.K_UP:
                 cell = (cell - 1) % 3
-
             if cell == 0:
                 pacmen_start_screen_sprites.update(230, 205)
             elif cell == 1:
@@ -203,12 +203,13 @@ def start_settings():
 def end_screen(fl):
     global win_music
     if fl:
-        game_over_image = pygame.image.load('data/game_over.png')
+        game_over_image = pygame.image.load('data/game_over.png')  # Музыка при проигрыше
         screen.blit(game_over_image, (225, 325))
         end_screen_enemy.draw(screen)
         end_screen_enemy.update()
     else:
         if not win_music:
+            # Музыка при выигрыши
             music_win = random.choice(['data/sound_win.mp3', 'data/sound_win_2.mp3'])
             pygame.mixer.music.load(music_win)
             pygame.mixer.music.play()
@@ -455,6 +456,7 @@ class Point(pygame.sprite.Sprite):
 attemp = 0
 
 
+# Класс который создаёт и управляет врагами
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, sheet, color, columns, rows, x, y):
         global level
@@ -467,10 +469,10 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.rect.move(x * title_width, y * title_width)
         self.speed_x = 6
         self.speed_y = 0
+        # Выбор скорости врага
+        self.speed_enemy = 6
         if level == 2:
             self.speed_enemy = 10
-        else:
-            self.speed_enemy = 6
         self.way_enemy = None
         self.start_enemy_motion = True
         self.mask = pygame.mask.from_surface(self.image)
@@ -512,6 +514,7 @@ class Enemy(pygame.sprite.Sprite):
             if attemp < 20:
                 self.way_enemy = random.choice(['up', 'left', 'right'])
                 attemp += 1
+            # Если пакман движется вниз то выполнится это условие
             if self.way_enemy == 'down':
                 self.x_coord = self.rect.x
                 self.y_coord = self.rect.y
@@ -525,7 +528,7 @@ class Enemy(pygame.sprite.Sprite):
                 if pygame.sprite.spritecollideany(self, wall_group):
                     self.rect.y -= self.speed_enemy
                     self.way_enemy = random.choice(['down', 'up', 'left', 'right'])
-
+            # Если пакман движется вверх то выполнится это условие
             if self.way_enemy == 'up':
                 self.x_coord = self.rect.x
                 self.y_coord = self.rect.y
@@ -539,7 +542,7 @@ class Enemy(pygame.sprite.Sprite):
                 if pygame.sprite.spritecollideany(self, wall_group):
                     self.rect.y += self.speed_enemy
                     self.way_enemy = random.choice(['down', 'up', 'left', 'right'])
-
+            # Если пакман движется влево то выполнится это условие
             if self.way_enemy == 'left':
                 self.x_coord = self.rect.x
                 self.y_coord = self.rect.y
@@ -553,7 +556,7 @@ class Enemy(pygame.sprite.Sprite):
                 if pygame.sprite.spritecollideany(self, wall_group):
                     self.rect.x += self.speed_enemy
                     self.way_enemy = random.choice(['down', 'up', 'left', 'right'])
-
+            # Если пакман движется вправо то выполнится это условие
             if self.way_enemy == 'right':
                 self.x_coord = self.rect.x
                 self.y_coord = self.rect.y
