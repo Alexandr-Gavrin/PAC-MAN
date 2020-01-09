@@ -41,8 +41,8 @@ volume = 0.5  # громкость музыки
 pygame.mixer.music.load('data/pacman_beginning.mp3')
 pygame.mixer.music.play()
 pygame.mixer.music.set_volume(volume)
-r, g, b = (random.randrange(0, 255), random.randrange(0, 255),
-           random.randrange(0, 255))  # цвет
+r, g, b = (random.randrange(50, 255), random.randrange(50, 255),
+           random.randrange(50, 255))  # цвет
 arr_color = [r, g, b]  # список цветов
 pacmen_start_screen_sprites = pygame.sprite.Group()  # группа спрайтов начального героя
 player_group = pygame.sprite.Group()  # группа спрайтов для пакмена в игре
@@ -235,7 +235,7 @@ def start_settings():
                     else:
                         volume_float[2] += 1
                     for number in range(len(volume_float)):
-                        volume_float[i] = str(volume_float[number])
+                        volume_float[number] = str(volume_float[number])
                     volume = ''.join(volume_float)
                     volume = float(volume)
                 pygame.mixer.music.set_volume(float(volume))
@@ -571,6 +571,7 @@ class Enemy(pygame.sprite.Sprite):
             self.rect.y = self.y_coord
             self.rect.y -= 6
             if pygame.sprite.spritecollideany(self, wall_group):
+                self.rect.y += 6
                 self.start_enemy_motion = False
         elif self.start_enemy_motion and not pygame.sprite.spritecollideany(self, wall_group):
             if self.rect.x > 402:
@@ -578,7 +579,7 @@ class Enemy(pygame.sprite.Sprite):
             else:
                 self.rect.x += 6
         elif not self.start_enemy_motion:
-            if attemp < 20:
+            if attemp < 16:
                 self.way_enemy = random.choice(['up', 'left', 'right'])
                 attemp += 1
             else:
@@ -596,7 +597,8 @@ class Enemy(pygame.sprite.Sprite):
                 self.rect.y += self.speed_enemy
                 if pygame.sprite.spritecollideany(self, wall_group):
                     self.rect.y -= self.speed_enemy
-                    self.way_enemy = random.choice(['down', 'up', 'left', 'right'])
+                    self.way_enemy = random.choice(['up', 'left', 'right'])
+
             # Если пакман движется вверх то выполнится это условие
             if self.way_enemy == 'up':
                 self.x_coord = self.rect.x
@@ -610,7 +612,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.rect.y -= self.speed_enemy
                 if pygame.sprite.spritecollideany(self, wall_group):
                     self.rect.y += self.speed_enemy
-                    self.way_enemy = random.choice(['down', 'up', 'left', 'right'])
+                    self.way_enemy = random.choice(['down', 'left', 'right'])
             # Если пакман движется влево то выполнится это условие
             if self.way_enemy == 'left':
                 self.x_coord = self.rect.x
@@ -624,7 +626,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.rect.x -= self.speed_enemy
                 if pygame.sprite.spritecollideany(self, wall_group):
                     self.rect.x += self.speed_enemy
-                    self.way_enemy = random.choice(['down', 'up', 'left', 'right'])
+                    self.way_enemy = random.choice(['down', 'up', 'right'])
             # Если пакман движется вправо то выполнится это условие
             if self.way_enemy == 'right':
                 self.x_coord = self.rect.x
@@ -638,7 +640,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.rect.x += self.speed_enemy
                 if pygame.sprite.spritecollideany(self, wall_group):
                     self.rect.x -= self.speed_enemy
-                    self.way_enemy = random.choice(['down', 'up', 'left', 'right'])
+                    self.way_enemy = random.choice(['down', 'up', 'left'])
 
         if pygame.sprite.spritecollideany(self, player_group):
             if fl_GOD is False:  # пасхалка
@@ -755,18 +757,8 @@ while main_running:  # цикл всего приложеня
                         pygame.mixer.music.unpause()
                         pause = False
         if not pause:  # изменение поля если нет паузы
-            random_number = random.randrange(0, 3)
-            if random_number == 0:
-                r += random.randrange(0, 10)
-            elif random_number == 1:
-                g += random.randrange(0, 10)
-            else:
-                b += random.randrange(0, 10)
-            wall_group = pygame.sprite.Group()
-            if r > 255 or b > 255 or g > 255:
-                r, g, b = (random.randrange(20, 50), random.randrange(20, 50),
-                           random.randrange(20, 50))
             screen.fill((0, 0, 0))
+            wall_group = pygame.sprite.Group()
             if generating_level == 0:  # закрытие блоков после выхода врагов из спавна
                 generate_level(load_level('rainbow_level.txt'))
             else:
@@ -803,8 +795,41 @@ while main_running:  # цикл всего приложеня
                 terminate()
                 # выход
             if event.type == pygame.KEYDOWN:
-                start_settings()  # установка начальных настроек
+                number = 0
+                end_screen_running = False
+                menu_running = True
+                volume = 0.1
+                fl_death = False
+                pygame.mixer.music.load('data/pacman_beginning.mp3')
+                pygame.mixer.music.play()
+                pygame.mixer.music.set_volume(volume)
+                pacmen_start_screen_sprites = pygame.sprite.Group()
+                player_group = pygame.sprite.Group()
+                start_screen_sprites = pygame.sprite.Group()
+                enemy_start_screen_sprites = pygame.sprite.Group()
+                left_enemy_group = pygame.sprite.Group()
+                PacmenStart()
+                start_screen()
+                Startmenuenemy(pygame.image.load('data/start_enemy.png').convert_alpha(), 4, 1, 0,
+                               800)
+                generating_level = 0
+                menu_running = True
+                is_load_level = False
+                all_sprites = pygame.sprite.Group()
+                wall_group = pygame.sprite.Group()
+                point_group = pygame.sprite.Group()
+                pygame.mouse.set_visible(False)
+                fl_HESOYAM = False
+                fl_GOD = False
+                score_count = 0
+                end_screen_enemy = pygame.sprite.Group()
+                particles = pygame.sprite.Group()
+                settings_group = pygame.sprite.Group()
+                change_value = pygame.sprite.Group()
+                attemp = 0  # установка начальных настроек
                 # запуск меню
+                r, g, b = (random.randrange(50, 255), random.randrange(50, 255),
+                           random.randrange(50, 255))
         screen.fill((0, 0, 0))
         if number == 1:  # запуск экрана проигрыша или выгрыша
             end_screen(fl_death)  # функция проигрыша и выигрыша
