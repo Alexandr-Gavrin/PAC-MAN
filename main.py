@@ -50,46 +50,11 @@ start_screen_sprites = pygame.sprite.Group()  # группа начальных 
 enemy_start_screen_sprites = pygame.sprite.Group()  # группа спрайтов начального врага
 left_enemy_group = pygame.sprite.Group()  # группа спрайтов врагов
 
-main_running = True
-menu_running = True
-settings_running = True
-pause = False
-game_running = True
-
-
-def start_settings():  # Функция для установки начальных настроек
-    number = 0
-    end_screen_running = False
-    menu_running = True
-    volume = 0.1
-    fl_death = False
-    pygame.mixer.music.load('data/pacman_beginning.mp3')
-    pygame.mixer.music.play()
-    pygame.mixer.music.set_volume(volume)
-    pacmen_start_screen_sprites = pygame.sprite.Group()
-    player_group = pygame.sprite.Group()
-    start_screen_sprites = pygame.sprite.Group()
-    enemy_start_screen_sprites = pygame.sprite.Group()
-    left_enemy_group = pygame.sprite.Group()
-    PacmenStart()
-    start_screen()
-    Startmenuenemy(pygame.image.load('data/start_enemy.png').convert_alpha(), 4, 1, 0,
-                   800)
-    generating_level = 0
-    menu_running = True
-    is_load_level = False
-    all_sprites = pygame.sprite.Group()
-    wall_group = pygame.sprite.Group()
-    point_group = pygame.sprite.Group()
-    pygame.mouse.set_visible(False)
-    fl_HESOYAM = False
-    fl_GOD = False
-    score_count = 0
-    end_screen_enemy = pygame.sprite.Group()
-    particles = pygame.sprite.Group()
-    settings_group = pygame.sprite.Group()
-    change_value = pygame.sprite.Group()
-    attemp = 0
+main_running = True  # переменная для запуска основного цикла приложения
+menu_running = True  # переменная для запуска основного цикла меню
+settings_running = True  # переменная для запуска основного цикла настроек
+pause = False  # переменная паузы
+game_running = True  # переменная для запуска основного цикла игры
 
 
 # функция выхода
