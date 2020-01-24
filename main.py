@@ -49,7 +49,10 @@ player_group = pygame.sprite.Group()  # группа спрайтов для п�
 start_screen_sprites = pygame.sprite.Group()  # группа начальных партиклов
 enemy_start_screen_sprites = pygame.sprite.Group()  # группа спрайтов начального врага
 left_enemy_group = pygame.sprite.Group()  # группа спрайтов врагов
-
+levels = ['level', 'level2']
+levelload = random.choice(levels)
+levelload1 = levelload + '.2.0'
+levelload2 = levelload + '.3.0'
 main_running = True  # переменная для запуска основного цикла приложения
 menu_running = True  # переменная для запуска основного цикла меню
 settings_running = True  # переменная для запуска основного цикла настроек
@@ -109,7 +112,7 @@ def start_screen():
                 # начать
                 if cell == 0:
                     if not is_load_level:
-                        generate_level(load_level('level.txt'))  # Генерация уровня
+                        generate_level(load_level(levelload + '.txt'))  # Генерация уровня
                         is_load_level = True
                     game_running = True  # запуск игрового цикла
                     menu_running = False  # прекращение цикла меню
@@ -725,9 +728,9 @@ while main_running:  # цикл всего приложеня
             screen.fill((0, 0, 0))
             wall_group = pygame.sprite.Group()
             if generating_level == 0:  # закрытие блоков после выхода врагов из спавна
-                generate_level(load_level('rainbow_level.txt'))
+                generate_level(load_level(levelload1 + '.txt'))
             else:
-                generate_level(load_level('rainbow_level_2.txt'))
+                generate_level(load_level(levelload2 + '.txt'))
             score_counter()  # запуск счетчика
             all_sprites.draw(screen)
             wall_group.draw(screen)
@@ -791,6 +794,9 @@ while main_running:  # цикл всего приложеня
                 particles = pygame.sprite.Group()
                 settings_group = pygame.sprite.Group()
                 change_value = pygame.sprite.Group()
+                levelload = random.choice(levels)
+                levelload1 = levelload + '.2.0'
+                levelload2 = levelload + '.3.0'
                 attemp = 0  # установка начальных настроек
                 # запуск меню
                 r, g, b = (random.randrange(50, 255), random.randrange(50, 255),
