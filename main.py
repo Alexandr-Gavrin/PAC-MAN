@@ -66,6 +66,13 @@ def terminate():
     sys.exit()
 
 
+# создание частиц
+def create_particles(position, count):
+    numbers = range(-5, 6)  # список скоростей звезд
+    for number in range(count):
+        Particle(position, random.choice(numbers), random.choice(numbers))
+
+
 # функция начальный экран
 def start_screen():
     global cell, menu_running, level, is_load_level, game_running, settings_running
@@ -130,6 +137,21 @@ def start_screen():
                 pacmen_start_screen_sprites.update(260, 295)
             else:
                 pacmen_start_screen_sprites.update(295, 385)
+
+
+# счетчик
+def score_counter():
+    global score_count
+    screen.fill((0, 0, 0))
+    font = pygame.font.Font(None, 25)
+    text = font.render(str(score_count), 0, (255, 255, 255))
+    text_x = 750  # положение
+    text_y = 330  # положение
+    text_w = text.get_width()
+    text_h = text.get_height()
+    screen.blit(text, (text_x, text_y))
+    pygame.draw.rect(screen, (255, 255, 255), (text_x - 10, text_y - 10,
+                                               text_w + 20, text_h + 20), 1)
 
 
 # Настройки
@@ -281,13 +303,6 @@ class Particle(pygame.sprite.Sprite):
             self.kill()  # удаление звезды при выходе за экран
 
 
-# создание частиц
-def create_particles(position, count):
-    numbers = range(-5, 6)  # список скоростей звезд
-    for number in range(count):
-        Particle(position, random.choice(numbers), random.choice(numbers))
-
-
 # враги на последнем экране
 class End_screen_enemies(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
@@ -355,21 +370,6 @@ class Startmenuenemy(pygame.sprite.Sprite):
         time.sleep(0.03)
 
 
-# счетчик
-def score_counter():
-    global score_count
-    screen.fill((0, 0, 0))
-    font = pygame.font.Font(None, 25)
-    text = font.render(str(score_count), 0, (255, 255, 255))
-    text_x = 750  # положение
-    text_y = 330  # положение
-    text_w = text.get_width()
-    text_h = text.get_height()
-    screen.blit(text, (text_x, text_y))
-    pygame.draw.rect(screen, (255, 255, 255), (text_x - 10, text_y - 10,
-                                               text_w + 20, text_h + 20), 1)
-
-
 # Класс пакмен
 class Player(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y, speed_x=6, speed_y=0):
@@ -406,14 +406,8 @@ class Player(pygame.sprite.Sprite):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
         # проверка на выхождение за карту
-        if self.rect.x < 0:
-            self.rect.x = 830
-        if self.rect.x > 830:
-            self.rect.x = 0
-        if self.rect.y < 0:
-            self.rect.y = 901
-        if self.rect.y > 901:
-            self.rect.y = 0
+        self.rect.x %= 830
+        self.rect.x %= 901
         if x == 0 and y == 0:
             # движение
             self.rect.x += self.speed_x
@@ -492,10 +486,10 @@ class Wall(pygame.sprite.Sprite):  # класс стен
 class Point(pygame.sprite.Sprite):  # класс очков
     def __init__(self, x, y):
         super().__init__(all_sprites, point_group)
-        self.image = pygame.Surface((title_width - 10, title_height - 10))
-        pygame.draw.circle(self.image, (255, 255, 173), (15, 15), 5, 0)
-        self.rect = self.image.get_rect().move(title_width * x - 3,
-                                               title_height * y)
+        self.image = pygame.Surface((8, 8))
+        pygame.draw.circle(self.image, (255, 255, 173), (4, 4), 5, 0)
+        self.rect = self.image.get_rect().move(title_width * x + 5,
+                                               title_height * y + 6)
 
 
 # Класс который создаёт и управляет врагами
@@ -682,7 +676,7 @@ while main_running:  # цикл всего приложеня
                         fl_HESOYAM = not fl_HESOYAM
                     if event.key == pygame.K_RIGHT:  # движение пакмена
                         for i in player_group:
-                            if fl_HESOYAM or not i.wall(15, 0) and prev_pac_man != 'right':
+                            if fl_HESOYAM or not i.wall(30, 0) and prev_pac_man != 'right':
                                 player_group = pygame.sprite.Group()
                                 Player(pygame.image.load('data/Pac-man_right.png').convert_alpha(),
                                        3, 1,
@@ -691,7 +685,7 @@ while main_running:  # цикл всего приложеня
                                 rotate_pacman = False
                     if event.key == pygame.K_DOWN:  # движение пакмена
                         for i in player_group:
-                            if fl_HESOYAM or not i.wall(0, 15) and prev_pac_man != 'down':
+                            if fl_HESOYAM or not i.wall(0, 30) and prev_pac_man != 'down':
                                 player_group = pygame.sprite.Group()
                                 Player(pygame.image.load('data/Pac-man_down.png').convert_alpha(),
                                        1, 3,
@@ -700,7 +694,7 @@ while main_running:  # цикл всего приложеня
                                 rotate_pacman = False
                     if event.key == pygame.K_LEFT:  # движение пакмена
                         for i in player_group:
-                            if fl_HESOYAM or not i.wall(-15, 0) and prev_pac_man != 'left':
+                            if fl_HESOYAM or not i.wall(-30, 0) and prev_pac_man != 'left':
                                 player_group = pygame.sprite.Group()
                                 Player(pygame.image.load('data/Pac-man_left.png').convert_alpha(),
                                        3, 1,
@@ -709,7 +703,7 @@ while main_running:  # цикл всего приложеня
                                 rotate_pacman = True
                     if event.key == pygame.K_UP:  # движение пакмена
                         for i in player_group:
-                            if fl_HESOYAM or not i.wall(0, -15) and prev_pac_man != 'up':
+                            if fl_HESOYAM or not i.wall(0, -30) and prev_pac_man != 'up':
                                 player_group = pygame.sprite.Group()
                                 Player(pygame.image.load('data/Pac-man_up.png').convert_alpha(), 1,
                                        3,
@@ -805,6 +799,5 @@ while main_running:  # цикл всего приложеня
         if number == 1:  # запуск экрана проигрыша или выгрыша
             end_screen(fl_death)  # функция проигрыша и выигрыша
         pygame.display.flip()
-
 pygame.quit()  # выход из игры
 # конец!
