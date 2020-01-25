@@ -49,10 +49,10 @@ player_group = pygame.sprite.Group()  # группа спрайтов для п�
 start_screen_sprites = pygame.sprite.Group()  # группа начальных партиклов
 enemy_start_screen_sprites = pygame.sprite.Group()  # группа спрайтов начального врага
 left_enemy_group = pygame.sprite.Group()  # группа спрайтов врагов
-levels = ['level', 'level2']
-levelload = random.choice(levels)
-levelload1 = levelload + '.2.0'
-levelload2 = levelload + '.3.0'
+levels = ['level', 'level2', 'level3', 'level4', 'level5']  # список уровней
+levelload = random.choice(levels)  # рандомный уровень
+levelload1 = levelload + '.2.0'  # уровень без очков
+levelload2 = levelload + '.3.0'  # уровень закрывающий блоки
 main_running = True  # переменная для запуска основного цикла приложения
 menu_running = True  # переменная для запуска основного цикла меню
 settings_running = True  # переменная для запуска основного цикла настроек
@@ -541,7 +541,7 @@ class Enemy(pygame.sprite.Sprite):
             else:
                 self.rect.x += 6
         elif not self.start_enemy_motion:
-            if attemp < 16:
+            if attemp < 40:
                 self.way_enemy = random.choice(['up', 'left', 'right'])
                 attemp += 1
             else:
@@ -676,7 +676,7 @@ while main_running:  # цикл всего приложеня
                         fl_HESOYAM = not fl_HESOYAM
                     if event.key == pygame.K_RIGHT:  # движение пакмена
                         for i in player_group:
-                            if fl_HESOYAM or not i.wall(30, 0) and prev_pac_man != 'right':
+                            if fl_HESOYAM or not i.wall(15, 0) and prev_pac_man != 'right':
                                 player_group = pygame.sprite.Group()
                                 Player(pygame.image.load('data/Pac-man_right.png').convert_alpha(),
                                        3, 1,
@@ -685,7 +685,7 @@ while main_running:  # цикл всего приложеня
                                 rotate_pacman = False
                     if event.key == pygame.K_DOWN:  # движение пакмена
                         for i in player_group:
-                            if fl_HESOYAM or not i.wall(0, 30) and prev_pac_man != 'down':
+                            if fl_HESOYAM or not i.wall(0, 15) and prev_pac_man != 'down':
                                 player_group = pygame.sprite.Group()
                                 Player(pygame.image.load('data/Pac-man_down.png').convert_alpha(),
                                        1, 3,
@@ -694,7 +694,7 @@ while main_running:  # цикл всего приложеня
                                 rotate_pacman = False
                     if event.key == pygame.K_LEFT:  # движение пакмена
                         for i in player_group:
-                            if fl_HESOYAM or not i.wall(-30, 0) and prev_pac_man != 'left':
+                            if fl_HESOYAM or not i.wall(-15, 0) and prev_pac_man != 'left':
                                 player_group = pygame.sprite.Group()
                                 Player(pygame.image.load('data/Pac-man_left.png').convert_alpha(),
                                        3, 1,
@@ -703,7 +703,7 @@ while main_running:  # цикл всего приложеня
                                 rotate_pacman = True
                     if event.key == pygame.K_UP:  # движение пакмена
                         for i in player_group:
-                            if fl_HESOYAM or not i.wall(0, -30) and prev_pac_man != 'up':
+                            if fl_HESOYAM or not i.wall(0, -15) and prev_pac_man != 'up':
                                 player_group = pygame.sprite.Group()
                                 Player(pygame.image.load('data/Pac-man_up.png').convert_alpha(), 1,
                                        3,
