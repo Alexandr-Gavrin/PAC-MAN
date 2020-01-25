@@ -406,8 +406,8 @@ class Player(pygame.sprite.Sprite):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
         # проверка на выхождение за карту
-        self.rect.x %= 830
-        self.rect.x %= 901
+        self.rect.x %= 828
+        self.rect.y %= 898
         if x == 0 and y == 0:
             # движение
             self.rect.x += self.speed_x
@@ -760,7 +760,6 @@ while main_running:  # цикл всего приложеня
                 number = 0
                 end_screen_running = False
                 menu_running = True
-                volume = 0.1
                 fl_death = False
                 pygame.mixer.music.load('data/pacman_beginning.mp3')
                 pygame.mixer.music.play()
